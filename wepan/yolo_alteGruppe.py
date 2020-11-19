@@ -1,7 +1,7 @@
 #packages
 import numpy as np
 import cv2
-#import database_connection as db 
+import database_connection as db 
 import datetime
 import argparse
 import os
@@ -17,17 +17,20 @@ def get_classes_from_config(class_config):
     global f
     with open(class_config, "r") as f:
         return [line.strip() for line in f.readlines()]
+
 # analyze image using yolo
 def analyze_image(image):
     blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), (0, 0, 0), True, crop=False)
     net.setInput(blob)
     return net.forward(output_layers)
+
 # gets relevant classes from all classes
 def get_relevant_class_ids():
     class_ids = []
     for relevant_class in relevant_classes:
         class_ids.append(classes.index(relevant_class))
     return class_ids
+    
 # remove overlapping boxes
 def remove_overlapping_boxes(boxes, confidences):
     if len(boxes) > 0:
