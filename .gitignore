@@ -1,3 +1,14 @@
+wepan/yolo-coco/
+wepan/videos/
+wepan/images/
+wepan/output/
+
+
+
+
+
+# Generic Python .gitignore below:
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
