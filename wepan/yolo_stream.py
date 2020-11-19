@@ -15,8 +15,8 @@ OUTPUT_FILE="output/outfile.avi"
 # load the COCO class labels our YOLO model was trained on
 labelsPath = os.path.sep.join([YOLO_PATH, "coco.names"])
 LABELS = open(labelsPath).read().strip().split("\n")
-CONFIDENCE=0.5
-THRESHOLD=0.3
+CONFIDENCE=0.01
+THRESHOLD=0.5
 
 # initialize a list of colors to represent each possible class label
 np.random.seed(42)
@@ -137,11 +137,11 @@ while True:
    (frame.shape[1], frame.shape[0]), True)
 
   # some information on processing on the first frame
-  if total > 0:
-   elap = (end - start)
-   print("[INFO] single frame took {:.4f} seconds".format(elap))
-   print("[INFO] estimated total time to finish: {:.4f}".format(
-    elap * total))
+#  if total > 0:
+#   elap = (end - start)
+#   print("[INFO] single frame took {:.4f} seconds".format(elap))
+#   print("[INFO] estimated total time to finish: {:.4f}".format(
+#    elap * total))
 
  # write the output frame to disk
  writer.write(frame)
