@@ -1,21 +1,21 @@
 # import the necessary packages
-import numpy as np
 import argparse
-import imutils
-import time
-import cv2
 import os
-from imutils.video import FPS
-from imutils.video import VideoStream
+import time
 
+import cv2
+import imutils
+import numpy as np
+from imutils.video import FPS, VideoStream
 
 RTSP_URL="https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=0"
 YOLO_PATH="yolo-coco"
 OUTPUT_FILE="output/outfile.avi"
+
 # load the COCO class labels our YOLO model was trained on
 labelsPath = os.path.sep.join([YOLO_PATH, "coco.names"])
 LABELS = open(labelsPath).read().strip().split("\n")
-CONFIDENCE=0.01
+CONFIDENCE=0.3
 THRESHOLD=0.5
 
 # initialize a list of colors to represent each possible class label
@@ -135,13 +135,6 @@ while True:
   fourcc = cv2.VideoWriter_fourcc(*"MJPG")
   writer = cv2.VideoWriter(OUTPUT_FILE, fourcc, 30,
    (frame.shape[1], frame.shape[0]), True)
-
-  # some information on processing on the first frame
-#  if total > 0:
-#   elap = (end - start)
-#   print("[INFO] single frame took {:.4f} seconds".format(elap))
-#   print("[INFO] estimated total time to finish: {:.4f}".format(
-#    elap * total))
 
  # write the output frame to disk
  writer.write(frame)

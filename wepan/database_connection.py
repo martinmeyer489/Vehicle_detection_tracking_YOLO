@@ -1,4 +1,4 @@
-def insert_frame():
+def insert_frame(test, zweite):
     pass
 
 def setup():
