@@ -16,10 +16,11 @@ URL4K = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi"
 URLHD = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=0"
 
 RTSP_URL = URLHD
-YOLO_PATH ="yolo-coco"
+YOLO_PATH = "yolo-coco"
+#YOLO_PATH = "tiny-yolo-coco"
 
-CONFIDENCE=0.5 # probability for a certain class
-THRESHOLD=0.4 # threshold used in non maximum supression (NMS) to filter out overlapping boxes
+CONFIDENCE=0.5 # probability for a certain class (std: 0.5)
+THRESHOLD=0.4 # threshold used in non maximum supression (NMS) to filter out overlapping boxes (std: 0.4)
 
 # Feature Toggles 
 REGION_OF_INTEREST = True
