@@ -1,7 +1,6 @@
-wepan/yolo-coco/
-wepan/videos/
-wepan/images/
-wepan/output/
+wepan/
+.vscode/
+yolo-coco/
 
 *desktop.ini 
 
