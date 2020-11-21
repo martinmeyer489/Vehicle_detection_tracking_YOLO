@@ -1,6 +1,7 @@
 wepan/
 .vscode/
 yolo-coco/
+tiny-yolo-coco/
 
 *desktop.ini 
 
