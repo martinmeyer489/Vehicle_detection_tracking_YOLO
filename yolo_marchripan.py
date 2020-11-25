@@ -12,12 +12,17 @@ from imutils.video import FPS, VideoStream
 
 import database as db
 
+# use images instead of stream
+IMAGE_INPUT = True
+IMAGE_PATH = "images/"
+
 URL4K = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi"
 URLHD = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=0"
 
 RTSP_URL = URLHD
-YOLO_PATH = "yolo-coco"
+#YOLO_PATH = "yolo-coco"
 #YOLO_PATH = "tiny-yolo-coco"
+YOLO_PATH = "yolo-coco-v4"
 
 CONFIDENCE=0.5 # probability for a certain class (std: 0.5)
 THRESHOLD=0.4 # threshold used in non maximum supression (NMS) to filter out overlapping boxes (std: 0.4)
@@ -50,29 +55,41 @@ def main():
     # frame dimensions
     vs = cv2.VideoCapture(RTSP_URL)
     fps = FPS().start()
-    writer = None
+
     (W, H) = (None, None)
 
     delta = 1
     frame_no = 0
 
     while True:
-        start = time.time()
-        delta_x_min = 10*delta
-        delta_x_max = 300*delta
+        if IMAGE_INPUT == True: 
+            # Get paths from argument
+            print("Reading from " + str(IMAGE_PATH))
+            _, _, filenames = next(walk(IMAGE_PATH), (None, None, []))
+            # Load images and start tracking
+            for filename in sorted(filenames):
+                img = cv2.imread(IMAGE_PATH+str(filename))
+                track_cars(img, IMAGE_PATH+str(filename))
+                if cv2.waitKey(1) == ord('q'):
+                    break
+            break
+        else: 
+            start = time.time()
+            delta_x_min = 10*delta
+            delta_x_max = 300*delta
 
-        # read the next frame from stream
-        (grabbed, frame) = vs.read()
-        
-        if not grabbed:
-            print('[ERROR] unable to grab input - check connection or link')
-            break
-        track_cars(frame, "live frame: " + str(fps._numFrames))
-        fps.update()
-        if cv2.waitKey(1) == ord('q'):
-            break
-        now = time.time()
-        delta = now-start
+            # read the next frame from stream
+            (grabbed, frame) = vs.read()
+            
+            if not grabbed:
+                print('[ERROR] unable to grab input - check connection or link')
+                break
+            track_cars(frame, "live frame: " + str(fps._numFrames))
+            fps.update()
+            if cv2.waitKey(1) == ord('q'):
+                break
+            now = time.time()
+            delta = now-start
     
     # stop the timer and display FPS information
     fps.stop()
@@ -179,14 +196,6 @@ def get_boxes_from_results(results, width, height):
                 confidences.append(float(confidence)) 
                 class_ids.append(class_id)
     return boxes, confidences, class_ids
-
-
-
-
-
-
-
-
   
 main()
 
