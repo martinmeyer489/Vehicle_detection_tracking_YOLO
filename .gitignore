@@ -5,6 +5,11 @@ tiny-yolo-coco/
 yolo-coco-v4/
 privat/
 images/
+prototypes/Christian/frames/
+prototypes/Christian/contour_frames_3/
+prototypes/Christian/Picture_example.py
+prototypes/Christian/vehicle_detection_v3.mp4
+prototypes/Christian/Video.py
 
 *desktop.ini 
 
