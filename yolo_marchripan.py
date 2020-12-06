@@ -29,7 +29,7 @@ CONFIDENCE=0.5 # probability for a certain class (std: 0.5)
 THRESHOLD=0.4 # threshold used in non maximum supression (NMS) to filter out overlapping boxes (std: 0.4)
 
 # Feature Toggles 
-REGION_OF_INTEREST = True
+REGION_OF_INTEREST = False
 
 # load the COCO class labels our YOLO model was trained on
 labelsPath = os.path.sep.join([YOLO_PATH, "coco.names"])
