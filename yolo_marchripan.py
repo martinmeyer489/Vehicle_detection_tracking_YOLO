@@ -13,16 +13,17 @@ from imutils.video import FPS, VideoStream
 import database as db
 
 # use images instead of stream
-IMAGE_INPUT = True
+IMAGE_INPUT = False
 IMAGE_PATH = "images/"
 
 URL4K = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi"
 URLHD = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=0"
 
 RTSP_URL = URLHD
-#YOLO_PATH = "yolo-coco"
-#YOLO_PATH = "tiny-yolo-coco"
-YOLO_PATH = "yolo-coco-v4"
+#YOLO_PATH = "detector/yolo-coco"
+#YOLO_PATH = "detector/tiny-yolo-coco"
+#YOLO_PATH = "detector/yolo-coco-v4"
+YOLO_PATH = "detector/custom-yolo-tiny-v4"
 
 CONFIDENCE=0.5 # probability for a certain class (std: 0.5)
 THRESHOLD=0.4 # threshold used in non maximum supression (NMS) to filter out overlapping boxes (std: 0.4)
@@ -63,7 +64,6 @@ def main():
 
     while True:
         if IMAGE_INPUT == True: 
-            # Get paths from argument
             print("Reading from " + str(IMAGE_PATH))
             _, _, filenames = next(walk(IMAGE_PATH), (None, None, []))
             # Load images and start tracking
