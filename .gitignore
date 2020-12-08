@@ -6,11 +6,15 @@ yolo-coco-v4/
 privat/
 images/
 detector/
-deep_sort_quidian213/
-deep-sort_alt/
+checkpoints/
+deep-sort-ausprobieren(alt)/
 
 *desktop.ini 
 
+
+*.mp4
+*.avi
+*.gif
 
 
 # Generic Python .gitignore below:
