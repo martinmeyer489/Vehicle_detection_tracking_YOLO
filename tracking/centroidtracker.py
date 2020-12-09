@@ -5,7 +5,7 @@ import self as self
 
 
 class centroidtracker():
-    def __init__(self, maxDisappeared=50):
+    def __init__(self, maxDisappeared=5):
         # initialize the next unique object ID along with two ordered
         # dictionaries used to keep track of mapping a given object
         # ID to its centroid and number of consecutive frames it has
