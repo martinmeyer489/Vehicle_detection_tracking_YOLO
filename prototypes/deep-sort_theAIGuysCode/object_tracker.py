@@ -102,11 +102,27 @@ def main(_argv):
             break
         frame_num +=1
         print('Frame #: ', frame_num)
+
+        ####################ROI##########################################################
+        mask = np.zeros_like(frame)
+        vertices = np.array([[0, 185], [1280, 185], [1280, 290], [0, 290],
+                             [0, 300], [1280, 300], [1280, 450], [0, 450]], np.int32)
+
+        # fill the mask
+        cv2.fillPoly(mask, [vertices], (255, 255, 255))
+
+        # show ROI only
+        frame = cv2.bitwise_and(frame, mask)
+        ####################################################################################
+
         frame_size = frame.shape[:2]
         image_data = cv2.resize(frame, (input_size, input_size))
         image_data = image_data / 255.
         image_data = image_data[np.newaxis, ...].astype(np.float32)
         start_time = time.time()
+
+
+
 
         # run detections on tflite if flag is set
         if FLAGS.framework == 'tflite':
