@@ -35,8 +35,8 @@ np.random.seed(42)
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
 
 # derive the paths to the YOLO weights and model configuration
-weightsPath = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny-detector_best.weights"])
-configPath = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny-detector.cfg"])
+weightsPath = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny-detector_best_new.weights"])
+configPath = os.path.sep.join([YOLO_PATH, "costum-yolov4-tiny-detector_new.cfg"])
 
 # load our YOLO object detector trained on COCO dataset (80 classes)
 # and determine only the *output* layer names that we need from YOLO
@@ -176,8 +176,8 @@ def process_frame (frame):
 
 def region_of_interest (frame): 
     mask = np.zeros_like(frame)
-    vertices = np.array([[0, 185], [1280, 185], [1280, 290], [0, 290],
-    [0, 300], [1280, 300], [1280, 450], [0, 450]], np.int32)
+    vertices = np.array([[0, 195], [1280, 195], [1280, 280], [0, 280],
+    [0, 324], [1280, 324], [1280, 430], [0, 430]], np.int32)
 
     # fill the mask
     cv2.fillPoly(mask, [vertices], (255, 255, 255)) 

@@ -1,11 +1,10 @@
 from collections import OrderedDict
 import numpy as np
 from scipy.spatial import distance as dist
-import self as self
 
 
 class centroidtracker():
-    def __init__(self, maxDisappeared=50):
+    def __init__(self, maxDisappeared=5):
         # initialize the next unique object ID along with two ordered
         # dictionaries used to keep track of mapping a given object
         # ID to its centroid and number of consecutive frames it has
@@ -14,9 +13,9 @@ class centroidtracker():
         self.objects = OrderedDict()
         self.disappeared = OrderedDict()
 
-		# store the number of maximum consecutive frames a given
-		# object is allowed to be marked as "disappeared" until we
-		# need to deregister the object from tracking
+        # store the number of maximum consecutive frames a given
+        # object is allowed to be marked as "disappeared" until we
+        # need to deregister the object from tracking
         self.maxDisappeared = maxDisappeared
 
     def register(self, centroid):
@@ -26,13 +25,11 @@ class centroidtracker():
         self.disappeared[self.nextObjectID] = 0
         self.nextObjectID += 1
 
-
     def deregister(self, objectID):
         # to deregister an object ID we delete the object ID from
         # both of our respective dictionaries
         del self.objects[objectID]
         del self.disappeared[objectID]
-
 
     def update(self, rects):
         # check to see if the list of input bounding box rectangles
@@ -45,8 +42,14 @@ class centroidtracker():
                 # if we have reached a maximum number of consecutive
                 # frames where a given object has been marked as
                 # missing, deregister it
-                if self.disappeared[objectID] > self.maxDisappeared:
+                # first two ifs check if vehicle is on edge of lane and use different maxdisappeared if so
+                if self.objects[objectID][1] < 277 and self.objects[objectID][0] < 400:
                     self.deregister(objectID)
+                elif self.objects[objectID][1] > 327 and self.objects[objectID][0] > 1230:
+                    self.deregister(objectID)
+                else:
+                    if self.disappeared[objectID] > self.maxDisappeared:
+                        self.deregister(objectID)
             # return early as there are no centroids or tracking info
             # to update
             return self.objects
@@ -62,7 +65,11 @@ class centroidtracker():
         # centroids and register each of them
         if len(self.objects) == 0:
             for i in range(0, len(inputCentroids)):
-                self.register(inputCentroids[i])
+                # check if vehicle is not on edge of lane
+                if inputCentroids[i][1] < 277 and inputCentroids[i][0] >= 400:
+                    self.register(inputCentroids[i])
+                if inputCentroids[i][1] > 327 and inputCentroids[i][0] <= 1230:
+                    self.register(inputCentroids[i])
                 # otherwise, are are currently tracking objects so we need to
                 # try to match the input centroids to existing object centroids
         else:
@@ -84,7 +91,7 @@ class centroidtracker():
             # finding the smallest value in each column and then
             # sorting using the previously computed row index list
             cols = D.argmin(axis=1)[rows]
-            #in order to determine if we need to update, register,
+            # in order to determine if we need to update, register,
             # or deregister an object we need to keep track of which
             # of the rows and column indexes we have already examined
             usedRows = set()
@@ -100,13 +107,16 @@ class centroidtracker():
                 # otherwise, grab the object ID for the current row,
                 # set its new centroid, and reset the disappeared
                 # counter
-                objectID = objectIDs[row]
-                self.objects[objectID] = inputCentroids[col]
-                self.disappeared[objectID] = 0
-                # indicate that we have examined each of the row and
-                # column indexes, respectively
-                usedRows.add(row)
-                usedCols.add(col)
+
+                #check if distance between objectCentroid and detetcted car is smaller than certain value
+                if D[row][col] < 200:
+                    objectID = objectIDs[row]
+                    self.objects[objectID] = inputCentroids[col]
+                    self.disappeared[objectID] = 0
+                    # indicate that we have examined each of the row and
+                    # column indexes, respectively
+                    usedRows.add(row)
+                    usedCols.add(col)
             # compute both the row and column index we have NOT yet
             # examined
             unusedRows = set(range(0, D.shape[0])).difference(usedRows)
@@ -125,13 +135,22 @@ class centroidtracker():
                     # check to see if the number of consecutive
                     # frames the object has been marked "disappeared"
                     # for warrants deregistering the object
-                    if self.disappeared[objectID] > self.maxDisappeared:
+                    # first two ifs check if vehicle is on edge of lane and use different maxdisappeared if so
+                    if objectCentroids[row][1] < 280 and objectCentroids[row][0] < 400:
                         self.deregister(objectID)
+                    elif objectCentroids[row][1] > 324 and objectCentroids[row][0] > 1230:
+                        self.deregister(objectID)
+                    else:
+                        if self.disappeared[objectID] > self.maxDisappeared:
+                            self.deregister(objectID)
             # otherwise, if the number of input centroids is greater
             # than the number of existing object centroids we need to
             # register each new input centroid as a trackable object
             else:
                 for col in unusedCols:
-                    self.register(inputCentroids[col])
+                    if inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 400:
+                        self.register(inputCentroids[col])
+                    if inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230:
+                        self.register(inputCentroids[col])
         # return the set of trackable objects
         return self.objects
