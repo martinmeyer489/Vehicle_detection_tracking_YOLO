@@ -4,11 +4,12 @@ from scipy.spatial import distance as dist
 
 
 class centroidtracker():
-    def __init__(self, maxDisappeared=5):
+    def __init__(self, maxDisappeared = 5):
         # initialize the next unique object ID along with two ordered
         # dictionaries used to keep track of mapping a given object
         # ID to its centroid and number of consecutive frames it has
         # been marked as "disappeared", respectively
+        self.previousPos = OrderedDict()
         self.nextObjectID = 0
         self.objects = OrderedDict()
         self.disappeared = OrderedDict()
@@ -22,6 +23,7 @@ class centroidtracker():
         # when registering an object we use the next available object
         # ID to store the centroid
         self.objects[self.nextObjectID] = centroid
+        self.previousPos[self.nextObjectID] = None
         self.disappeared[self.nextObjectID] = 0
         self.nextObjectID += 1
 
@@ -30,6 +32,7 @@ class centroidtracker():
         # both of our respective dictionaries
         del self.objects[objectID]
         del self.disappeared[objectID]
+        del self.previousPos[objectID]
 
     def update(self, rects):
         # check to see if the list of input bounding box rectangles
@@ -39,17 +42,23 @@ class centroidtracker():
             # as disappeared
             for objectID in list(self.disappeared.keys()):
                 self.disappeared[objectID] += 1
+                if self.previousPos[objectID] is not None:
+                    print(self.objects[objectID] - self.previousPos[objectID])
+                    self.objects[objectID] += self.objects[objectID] - self.previousPos[objectID]
+                self.previousPos[objectID] = self.objects[objectID]
                 # if we have reached a maximum number of consecutive
                 # frames where a given object has been marked as
                 # missing, deregister it
                 # first two ifs check if vehicle is on edge of lane and use different maxdisappeared if so
-                if self.objects[objectID][1] < 277 and self.objects[objectID][0] < 400:
+                if self.objects[objectID][1] < 277 and self.objects[objectID][0] < 50:
                     self.deregister(objectID)
                 elif self.objects[objectID][1] > 327 and self.objects[objectID][0] > 1230:
                     self.deregister(objectID)
                 else:
                     if self.disappeared[objectID] > self.maxDisappeared:
                         self.deregister(objectID)
+
+
             # return early as there are no centroids or tracking info
             # to update
             return self.objects
@@ -66,7 +75,7 @@ class centroidtracker():
         if len(self.objects) == 0:
             for i in range(0, len(inputCentroids)):
                 # check if vehicle is not on edge of lane
-                if inputCentroids[i][1] < 277 and inputCentroids[i][0] >= 400:
+                if inputCentroids[i][1] < 277 and inputCentroids[i][0] >= 50:
                     self.register(inputCentroids[i])
                 if inputCentroids[i][1] > 327 and inputCentroids[i][0] <= 1230:
                     self.register(inputCentroids[i])
@@ -113,6 +122,8 @@ class centroidtracker():
                     objectID = objectIDs[row]
                     self.objects[objectID] = inputCentroids[col]
                     self.disappeared[objectID] = 0
+
+                    self.previousPos[objectID] = self.objects[objectID]
                     # indicate that we have examined each of the row and
                     # column indexes, respectively
                     usedRows.add(row)
@@ -132,11 +143,15 @@ class centroidtracker():
                     # index and increment the disappeared counter
                     objectID = objectIDs[row]
                     self.disappeared[objectID] += 1
+                    if self.previousPos[objectID] is not None:
+                        print(self.objects[objectID] - self.previousPos[objectID])
+                        self.objects[objectID] += self.objects[objectID] - self.previousPos[objectID]
+                    self.previousPos[objectID] = self.objects[objectID]
                     # check to see if the number of consecutive
                     # frames the object has been marked "disappeared"
                     # for warrants deregistering the object
                     # first two ifs check if vehicle is on edge of lane and use different maxdisappeared if so
-                    if objectCentroids[row][1] < 280 and objectCentroids[row][0] < 400:
+                    if objectCentroids[row][1] < 280 and objectCentroids[row][0] < 50:
                         self.deregister(objectID)
                     elif objectCentroids[row][1] > 324 and objectCentroids[row][0] > 1230:
                         self.deregister(objectID)
@@ -148,7 +163,7 @@ class centroidtracker():
             # register each new input centroid as a trackable object
             else:
                 for col in unusedCols:
-                    if inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 400:
+                    if inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50:
                         self.register(inputCentroids[col])
                     if inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230:
                         self.register(inputCentroids[col])
