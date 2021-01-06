@@ -12,10 +12,14 @@ from imutils.video import FPS
 IMAGE_INPUT = False
 IMAGE_PATH = "images/"
 
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter('output_test.avi', fourcc, 20, (800, 600))
+
 URL4K = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&rotation=0&audio=0&mirror=0&fps=0&compression=60"
 URLHD = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=00"
 
 RTSP_URL = URLHD
+#RTSP_URL = "wepan/data/video/street5fps.mp4"
 #YOLO_PATH = "yolo-coco"
 #YOLO_PATH = "tiny-yolo-coco"
 YOLO_PATH = "yolo-coco"
@@ -92,18 +96,22 @@ def main():
                 break
             now = time.time()
             delta = now-start
+
     
     # stop the timer and display FPS information
     fps.stop()
-
-    print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+    print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
+
+
+
 
     # do a bit of cleanup
     print("[INFO] cleaning up...")
     cv2.destroyAllWindows()
     # release the file pointers
     vs.release()
+    #out.release()
 
 
 # process and display framesq
@@ -165,6 +173,7 @@ def track_cars (frame, frame_no):
     #Show Frame
     cv2.imshow("Frame", cv2.resize(processed_frame, (800, 600)))
 
+    #out.write(cv2.resize(processed_frame, (800, 600)))
 
 # falls es noch weiteres zum processen geben sollte. 
 # sonst diese methode einfach wieder löschen und direkt region of interest aufrufen
