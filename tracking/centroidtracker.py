@@ -10,6 +10,7 @@ class centroidtracker():
         # ID to its centroid and number of consecutive frames it has
         # been marked as "disappeared", respectively
         self.previousPos = OrderedDict()
+        self.pre_previousPos = OrderedDict()
         self.nextObjectID = 0
         self.objects = OrderedDict()
         self.disappeared = OrderedDict()
@@ -24,6 +25,7 @@ class centroidtracker():
         # ID to store the centroid
         self.objects[self.nextObjectID] = centroid
         self.previousPos[self.nextObjectID] = None
+        self.pre_previousPos[self.nextObjectID] = None
         self.disappeared[self.nextObjectID] = 0
         self.nextObjectID += 1
 
@@ -33,6 +35,7 @@ class centroidtracker():
         del self.objects[objectID]
         del self.disappeared[objectID]
         del self.previousPos[objectID]
+        del self.pre_previousPos[objectID]
 
     def update(self, rects):
         # check to see if the list of input bounding box rectangles
@@ -42,9 +45,11 @@ class centroidtracker():
             # as disappeared
             for objectID in list(self.disappeared.keys()):
                 self.disappeared[objectID] += 1
-                if self.previousPos[objectID] is not None:
-                    print(self.objects[objectID] - self.previousPos[objectID])
-                    self.objects[objectID] += self.objects[objectID] - self.previousPos[objectID]
+                if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
+                    print(self.previousPos[objectID] - self.pre_previousPos[objectID])
+                    if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < 3:
+                        self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
+                self.pre_previousPos[objectID] = self.previousPos[objectID]
                 self.previousPos[objectID] = self.objects[objectID]
                 # if we have reached a maximum number of consecutive
                 # frames where a given object has been marked as
@@ -123,6 +128,7 @@ class centroidtracker():
                     self.objects[objectID] = inputCentroids[col]
                     self.disappeared[objectID] = 0
 
+                    self.pre_previousPos[objectID] = self.previousPos[objectID]
                     self.previousPos[objectID] = self.objects[objectID]
                     # indicate that we have examined each of the row and
                     # column indexes, respectively
@@ -143,9 +149,11 @@ class centroidtracker():
                     # index and increment the disappeared counter
                     objectID = objectIDs[row]
                     self.disappeared[objectID] += 1
-                    if self.previousPos[objectID] is not None:
-                        print(self.objects[objectID] - self.previousPos[objectID])
-                        self.objects[objectID] += self.objects[objectID] - self.previousPos[objectID]
+                    if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
+                        print(self.previousPos[objectID] - self.pre_previousPos[objectID])
+                        if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < 3:
+                            self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
+                    self.pre_previousPos[objectID] = self.previousPos[objectID]
                     self.previousPos[objectID] = self.objects[objectID]
                     # check to see if the number of consecutive
                     # frames the object has been marked "disappeared"
