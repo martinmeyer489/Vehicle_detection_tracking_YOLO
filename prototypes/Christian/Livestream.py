@@ -66,13 +66,13 @@ def main():
             break
         # track_cars(frame, str(fps._numFrames))
 
-        grayB = cv2.cvtColor(masked_frame, cv2.COLOR_BGR2GRAY)
+        grayB = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         if not firstImage:
             diff_image = cv2.absdiff(grayB, grayA)
 
             # image thresholding
-            ret, thresh = cv2.threshold(diff_image, 40, 255, cv2.THRESH_BINARY)
+            ret, thresh = cv2.threshold(diff_image, 30, 255, cv2.THRESH_BINARY)
 
             # image dilation
             dilated = cv2.dilate(thresh, kernel, iterations=1)
@@ -92,22 +92,22 @@ def main():
             #cv2.drawContours(frame, contoursB, -1, (127, 200, 0), 2)
 
             # find valid contours
-            addCar(1, frame[200, 1250], rWhiteA1)
-            rWhiteA1 = np.array_equal(frame[200, 1250], np.array([255, 255, 255], None))
-            addCar(2, frame[232, 1250], rWhiteA2)
-            rWhiteA2 = np.array_equal(frame[232, 1250], np.array([255, 255, 255], None))
-            addCar(3, frame[262, 1250], rWhiteA3)
-            rWhiteA3 = np.array_equal(frame[262, 1250], np.array([255, 255, 255], None))
+            # addCar(1, frame[200, 1250], rWhiteA1)
+            # rWhiteA1 = np.array_equal(frame[200, 1250], np.array([255, 255, 255], None))
+            # addCar(2, frame[232, 1250], rWhiteA2)
+            # rWhiteA2 = np.array_equal(frame[232, 1250], np.array([255, 255, 255], None))
+            # addCar(3, frame[262, 1250], rWhiteA3)
+            # rWhiteA3 = np.array_equal(frame[262, 1250], np.array([255, 255, 255], None))
+            #
+            # subtractCar(1, frame[200, 30], lWhiteA1)
+            # lWhiteA1 = np.array_equal(frame[200, 30], np.array([255, 255, 255], None))
+            # subtractCar(2, frame[232, 30], lWhiteA2)
+            # lWhiteA2 = np.array_equal(frame[232, 30], np.array([255, 255, 255], None))
+            # subtractCar(3, frame[262, 30], lWhiteA3)
+            # lWhiteA3 = np.array_equal(frame[232, 30], np.array([255, 255, 255], None))
 
-            subtractCar(1, frame[200, 30], lWhiteA1)
-            lWhiteA1 = np.array_equal(frame[200, 30], np.array([255, 255, 255], None))
-            subtractCar(2, frame[232, 30], lWhiteA2)
-            lWhiteA2 = np.array_equal(frame[232, 30], np.array([255, 255, 255], None))
-            subtractCar(3, frame[262, 30], lWhiteA3)
-            lWhiteA3 = np.array_equal(frame[232, 30], np.array([255, 255, 255], None))
-
-        for i in range(len(carsPerLane)):
-            cv2.putText(frame, "Vehicles detected in lane " + str(i+1) + ": " + str(carsPerLane[i]), (55, 115+i*30), font, 0.6, (0, 180, 0), 2)
+        # for i in range(len(carsPerLane)):
+        #     cv2.putText(frame, "Vehicles detected in lane " + str(i+1) + ": " + str(carsPerLane[i]), (55, 115+i*30), font, 0.6, (0, 180, 0), 2)
 
         if not firstImage:
              cv2.imshow("Frame", cv2.resize(dilated, (800, 600)))
