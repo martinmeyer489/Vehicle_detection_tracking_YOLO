@@ -16,9 +16,11 @@ fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter('output_test.avi', fourcc, 20, (800, 600))
 
 URL4K = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&rotation=0&audio=0&mirror=0&fps=0&compression=60"
-URLHD = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=00"
+URLHD = "cgi?camera=1https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=00"
+URLVIDEO= "/Users/MeyerMa/Desktop/DCAITI/stream videos/streamcomp50-14uhr.mp4"
 
-RTSP_URL = URLHD
+
+RTSP_URL = URLVIDEO
 #RTSP_URL = "wepan/data/video/street5fps.mp4"
 #YOLO_PATH = "yolo-coco"
 #YOLO_PATH = "tiny-yolo-coco"
@@ -39,8 +41,8 @@ np.random.seed(42)
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
 
 # derive the paths to the YOLO weights and model configuration
-weightsPath = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny-detector_best_new.weights"])
-configPath = os.path.sep.join([YOLO_PATH, "costum-yolov4-tiny-detector_new.cfg"])
+weightsPath = os.path.sep.join([YOLO_PATH, "yolov4-tiny-big-data.weights"])
+configPath = os.path.sep.join([YOLO_PATH, "yolov4-tiny-big-data.cfg"])
 
 # load our YOLO object detector trained on COCO dataset (80 classes)
 # and determine only the *output* layer names that we need from YOLO

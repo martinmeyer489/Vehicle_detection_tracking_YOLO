@@ -47,7 +47,8 @@ class centroidtracker():
                 self.disappeared[objectID] += 1
                 if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
                     print(self.previousPos[objectID] - self.pre_previousPos[objectID])
-                    self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
+                    if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < 3:
+                        self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
                 self.pre_previousPos[objectID] = self.previousPos[objectID]
                 self.previousPos[objectID] = self.objects[objectID]
                 # if we have reached a maximum number of consecutive
@@ -150,7 +151,8 @@ class centroidtracker():
                     self.disappeared[objectID] += 1
                     if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
                         print(self.previousPos[objectID] - self.pre_previousPos[objectID])
-                        self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
+                        if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < 3:
+                            self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
                     self.pre_previousPos[objectID] = self.previousPos[objectID]
                     self.previousPos[objectID] = self.objects[objectID]
                     # check to see if the number of consecutive
