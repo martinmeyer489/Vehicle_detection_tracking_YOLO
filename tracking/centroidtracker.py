@@ -8,8 +8,10 @@ verticalToleranceMovement = 5
 # vertical tolerance for assign IDs (Object centroid to Input centroid)
 verticalTolerance = 10
 
+maxDisappeared = 5
+
 class centroidtracker():
-    def __init__(self, maxDisappeared = 5):
+    def __init__(self, maxDisappeared = maxDisappeared):
         # initialize the next unique object ID along with two ordered
         # dictionaries used to keep track of mapping a given object
         # ID to its centroid and number of consecutive frames it has
@@ -19,6 +21,7 @@ class centroidtracker():
         self.nextObjectID = 0
         self.objects = OrderedDict()
         self.disappeared = OrderedDict()
+        self.missing_detection = OrderedDict()
 
         # store the number of maximum consecutive frames a given
         # object is allowed to be marked as "disappeared" until we
@@ -33,6 +36,7 @@ class centroidtracker():
         self.pre_previousPos[self.nextObjectID] = None
         self.disappeared[self.nextObjectID] = 0
         self.nextObjectID += 1
+        self.missing_detection[self.nextObjectID] = False
 
     def deregister(self, objectID):
         # to deregister an object ID we delete the object ID from
@@ -43,12 +47,16 @@ class centroidtracker():
         del self.pre_previousPos[objectID]
 
     def update(self, rects):
+        #create current timestamp
+        #.......
+
         # check to see if the list of input bounding box rectangles
         # is empty
         if len(rects) == 0:
             # loop over any existing tracked objects and mark them
             # as disappeared
             for objectID in list(self.disappeared.keys()):
+                self.missing_detection[self.nextObjectID] = False
                 self.disappeared[objectID] += 1
                 self.continueMovement(objectID, verticalToleranceMovement)
                 self.pre_previousPos[objectID] = self.previousPos[objectID]
@@ -68,7 +76,16 @@ class centroidtracker():
 
             # return early as there are no centroids or tracking info
             # to update
+            
+            #pass to insert_funktion:
+            #object_id -> key von self.objects, und die jeweiligen values des keys ist ein array mit [x, y]
+            #bounding boxes: rects hat die 4 koordinaten von der bb, siehe yolo_marchripan zeile 139
+            #object_type: siehe zeile 144 von yolo_marchripan
+            # confidence: siehe selbe zeile
+            # 
+
             return self.objects
+
         # initialize an array of input centroids for the current frame
         inputCentroids = np.zeros((len(rects), 2), dtype="int")
         # loop over the bounding box rectangles
@@ -131,6 +148,7 @@ class centroidtracker():
                         objectID = objectIDs[row]
                         self.objects[objectID] = inputCentroids[col]
                         self.disappeared[objectID] = 0
+                        self.missing_detection[objectID] = False
 
                         self.pre_previousPos[objectID] = self.previousPos[objectID]
                         self.previousPos[objectID] = self.objects[objectID]
@@ -152,6 +170,8 @@ class centroidtracker():
                     # grab the object ID for the corresponding row
                     # index and increment the disappeared counter
                     objectID = objectIDs[row]
+                    self.missing_detection[objectID] = False
+
                     self.disappeared[objectID] += 1
                     self.continueMovement(objectID, verticalToleranceMovement)
                     self.pre_previousPos[objectID] = self.previousPos[objectID]
@@ -180,9 +200,11 @@ class centroidtracker():
         return self.objects
 
     def continueMovement(self, objectID, verticalToleranceMovement):
+        # check if values for the two previous positions are existent (i.e. the object has to be detected at least twice)
         if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
-            prevMovement = self.previousPos[objectID] - self.pre_previousPos[objectID]
             print(prevMovement)
+            # check if vertical movement is plausible
             if abs(prevMovement[1]) < verticalToleranceMovement:
                 if (self.objects[objectID][1] < 302 and prevMovement[0]) < 0 or (self.objects[objectID][1] > 302 and prevMovement[0]) > 0:
                     self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
+                    self.detection_status[self.nextObjectID] = True
