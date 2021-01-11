@@ -2,6 +2,11 @@ from collections import OrderedDict
 import numpy as np
 from scipy.spatial import distance as dist
 
+# vertical tolerance for continuing movement of unassgined IDs (previous to preprevious)
+verticalToleranceMovement = 5
+
+# vertical tolerance for assign IDs (Object centroid to Input centroid)
+verticalTolerance = 10
 
 class centroidtracker():
     def __init__(self, maxDisappeared = 5):
@@ -45,10 +50,7 @@ class centroidtracker():
             # as disappeared
             for objectID in list(self.disappeared.keys()):
                 self.disappeared[objectID] += 1
-                if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
-                    print(self.previousPos[objectID] - self.pre_previousPos[objectID])
-                    if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < 3:
-                        self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
+                self.continueMovement(objectID, verticalToleranceMovement)
                 self.pre_previousPos[objectID] = self.previousPos[objectID]
                 self.previousPos[objectID] = self.objects[objectID]
                 # if we have reached a maximum number of consecutive
@@ -124,16 +126,18 @@ class centroidtracker():
 
                 #check if distance between objectCentroid and detetcted car is smaller than certain value
                 if D[row][col] < 200:
-                    objectID = objectIDs[row]
-                    self.objects[objectID] = inputCentroids[col]
-                    self.disappeared[objectID] = 0
+                    #check if vertical distance is smaller than certain value
+                    if abs(self.objects[objectIDs[row]][1] - inputCentroids[col][1]) < verticalTolerance:
+                        objectID = objectIDs[row]
+                        self.objects[objectID] = inputCentroids[col]
+                        self.disappeared[objectID] = 0
 
-                    self.pre_previousPos[objectID] = self.previousPos[objectID]
-                    self.previousPos[objectID] = self.objects[objectID]
-                    # indicate that we have examined each of the row and
-                    # column indexes, respectively
-                    usedRows.add(row)
-                    usedCols.add(col)
+                        self.pre_previousPos[objectID] = self.previousPos[objectID]
+                        self.previousPos[objectID] = self.objects[objectID]
+                        # indicate that we have examined each of the row and
+                        # column indexes, respectively
+                        usedRows.add(row)
+                        usedCols.add(col)
             # compute both the row and column index we have NOT yet
             # examined
             unusedRows = set(range(0, D.shape[0])).difference(usedRows)
@@ -149,10 +153,7 @@ class centroidtracker():
                     # index and increment the disappeared counter
                     objectID = objectIDs[row]
                     self.disappeared[objectID] += 1
-                    if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
-                        print(self.previousPos[objectID] - self.pre_previousPos[objectID])
-                        if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < 3:
-                            self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
+                    self.continueMovement(objectID, verticalToleranceMovement)
                     self.pre_previousPos[objectID] = self.previousPos[objectID]
                     self.previousPos[objectID] = self.objects[objectID]
                     # check to see if the number of consecutive
@@ -177,3 +178,11 @@ class centroidtracker():
                         self.register(inputCentroids[col])
         # return the set of trackable objects
         return self.objects
+
+    def continueMovement(self, objectID, verticalToleranceMovement):
+        if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
+            prevMovement = self.previousPos[objectID] - self.pre_previousPos[objectID]
+            print(prevMovement)
+            if abs(prevMovement[1]) < verticalToleranceMovement:
+                if (self.objects[objectID][1] < 302 and prevMovement[0]) < 0 or (self.objects[objectID][1] > 302 and prevMovement[0]) > 0:
+                    self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
