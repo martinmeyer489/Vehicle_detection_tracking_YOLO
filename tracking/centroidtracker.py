@@ -202,9 +202,9 @@ class centroidtracker():
     def continueMovement(self, objectID, verticalToleranceMovement):
         # check if values for the two previous positions are existent (i.e. the object has to be detected at least twice)
         if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
-            print(prevMovement)
+            print(self.previousPos[objectID] - self.pre_previousPos[objectID])
             # check if vertical movement is plausible
-            if abs(prevMovement[1]) < verticalToleranceMovement:
-                if (self.objects[objectID][1] < 302 and prevMovement[0]) < 0 or (self.objects[objectID][1] > 302 and prevMovement[0]) > 0:
+            if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < verticalToleranceMovement:
+                if (self.objects[objectID][1] < 302 and self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0 or (self.objects[objectID][1] > 302 and self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0:
                     self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
-                    self.detection_status[self.nextObjectID] = True
+                    self.missing_detection[self.nextObjectID] = True
