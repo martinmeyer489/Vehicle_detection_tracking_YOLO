@@ -1,12 +1,23 @@
 import sqlite3
 from sqlite3 import Error
 
-def insert_detections(conn, ):
-    sql_insert_detection = """
-                            INSERT INTO detections
-                            [], 
+def insert_detections(conn, object_for_db):
 
-                            """
+     #pass to insert_funktion:
+            #object_id -> key von self.objects, und die jeweiligen values des keys ist ein array mit [x, y]
+            #bounding boxes: rects hat die 4 koordinaten von der bb, siehe yolo_marchripan zeile 139
+            #object_type: siehe zeile 144 von yolo_marchripan
+            # confidence: siehe selbe zeile
+            # 
+
+
+    sql = """ INSERT INTO detections (timestamp, object_id, c_x, c_y, bb_w, bb_h, object_type, continued_movement, inserted_db_timestamp)
+            VALUES (?,?,?,?,?,?,?,?,?) """
+
+    cur = conn.cursor()
+    cur.execute (sql, object_for_db)
+    conn.commit()
+    #print('writing db')
 
 
 def init_db(conn):
@@ -22,8 +33,8 @@ def init_db(conn):
                                     bb_h integer,
                                     object_type text,
                                     confidence double,
-                                    missing_detection boolean,
-                                    inserted_db_timestamp integer NOT NULL
+                                    continued_movement boolean,
+                                    inserted_db_timestamp integer NOT NULL,
                                     PRIMARY KEY (timestamp, object_id)
                                 );"""
 
