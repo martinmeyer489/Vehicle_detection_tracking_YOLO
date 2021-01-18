@@ -101,9 +101,8 @@ class centroidtracker():
         if len(self.objects) == 0:
             for i in range(0, len(inputCentroids)):
                 # check if vehicle is not on edge of lane
-                if inputCentroids[i][1] < 277 and inputCentroids[i][0] >= 50:
-                    self.register(inputCentroids[i])
-                if inputCentroids[i][1] > 327 and inputCentroids[i][0] <= 1230:
+                if (inputCentroids[i][1] < 277 and inputCentroids[i][0] >= 50) or \
+                (inputCentroids[i][1] > 327 and inputCentroids[i][0] <= 1230):
                     self.register(inputCentroids[i])
                 # otherwise, are are currently tracking objects so we need to
                 # try to match the input centroids to existing object centroids
