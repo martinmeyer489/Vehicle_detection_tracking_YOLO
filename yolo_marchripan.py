@@ -1,47 +1,50 @@
-# packages
-from tracking.centroidtracker import centroidtracker
+############################################################################
+# IMPORTS
+
 import os
 import time
-from os import walk
+#from os import walk
 
 import cv2
 import numpy as np
 from imutils.video import FPS
 
-# use images instead of stream
-IMAGE_INPUT = False
-IMAGE_PATH = "images/"
+import config as cfg
+from tracking.centroidtracker import centroidtracker
 
-URL4K = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&rotation=0&audio=0&mirror=0&fps=0&compression=60"
-URLHD = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=00"
 
-RTSP_URL = URLHD
-# YOLO_PATH = "yolo-coco"
-# YOLO_PATH = "tiny-yolo-coco"
-YOLO_PATH = "yolo-coco"
 
-CONFIDENCE = 0.01  # probability for a certain class (std: 0.5)
-THRESHOLD = 0.1  # threshold used in non maximum supression (NMS) to filter out overlapping boxes (std: 0.4)
+############################################################################
+# Settings
 
-# Feature Toggles
-REGION_OF_INTEREST = True
+YOLO_INPUT = cfg.YOLO_INPUT
+YOLO_PATH = cfg.YOLO_PATH
+
+CONFIDENCE = cfg.CONFIDENCE
+THRESHOLD = cfg.THRESHOLD
 
 # load the COCO class labels our YOLO model was trained on
-labelsPath = os.path.sep.join([YOLO_PATH, "coco2.names"])
-LABELS = open(labelsPath).read().strip().split("\n")  # to-do only include relevant labels
+LABELS_PATH = cfg.LABELS_PATH
+LABELS = open(LABELS_PATH).read().strip().split("\n")  
 
 # initialize a list of colors to represent each possible class label
 np.random.seed(42)
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
 
 # derive the paths to the YOLO weights and model configuration
-weightsPath = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny.weights"])
-configPath = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny.cfg"])
+WEIGHTS_PATH = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny.weights"])
+YOLO_CONFIG_PATH = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny.cfg"])
 
-# load our YOLO object detector trained on COCO dataset (80 classes)
-# and determine only the *output* layer names that we need from YOLO
+# Feature Toggles
+REGION_OF_INTEREST = cfg.REGION_OF_INTEREST
+
+
+
+############################################################################
+# Tracking
+
 print("[INFO] loading YOLO from disk...")
-net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
+net = cv2.dnn.readNetFromDarknet(YOLO_CONFIG_PATH, WEIGHTS_PATH)
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
@@ -56,43 +59,22 @@ def main():
     # frame dimensions
     # initialize our centroid tracker and frame dimensions
 
-    vs = cv2.VideoCapture(RTSP_URL)
+    vs = cv2.VideoCapture(YOLO_INPUT)
     fps = FPS().start()
 
     (W, H) = (None, None)
 
-    delta = 1
-    frame_no = 0
-
     while True:
-        if IMAGE_INPUT == True:
-            # Get paths from argument
-            print("Reading from " + str(IMAGE_PATH))
-            _, _, filenames = next(walk(IMAGE_PATH), (None, None, []))
-            # Load images and start tracking
-            for filename in sorted(filenames):
-                img = cv2.imread(IMAGE_PATH + str(filename))
-                track_cars(img, IMAGE_PATH + str(filename), )
-                if cv2.waitKey(1) == ord('q'):
-                    break
+        # read the next frame from stream
+        (grabbed, frame) = vs.read()
+
+        if not grabbed:
+            print('[ERROR] unable to grab input - check connection or link')
             break
-        else:
-            start = time.time()
-            delta_x_min = 10 * delta
-            delta_x_max = 300 * delta
-
-            # read the next frame from stream
-            (grabbed, frame) = vs.read()
-
-            if not grabbed:
-                print('[ERROR] unable to grab input - check connection or link')
-                break
-            track_cars(frame, "live frame: " + str(fps._numFrames))
-            fps.update()
-            if cv2.waitKey(1) == ord('q'):
-                break
-            now = time.time()
-            delta = now - start
+        track_cars(frame, "live frame: " + str(fps._numFrames))
+        fps.update()
+        if cv2.waitKey(1) == ord('q'):
+            break
 
     # stop the timer and display FPS information
     fps.stop()

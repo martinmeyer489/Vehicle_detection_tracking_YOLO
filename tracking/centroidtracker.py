@@ -1,20 +1,19 @@
 import time
 from collections import OrderedDict
 
+import config as cfg
 import database as db
 import numpy as np
 from scipy.spatial import distance as dist
 
-# vertical tolerance for continuing movement of unassgined IDs (previous to preprevious)
-verticalToleranceMovement = 5
 
-# vertical tolerance for assign IDs (Object centroid to Input centroid)
-verticalTolerance = 10
+VERTICAL_TOLERANCE_MOVEMENT = cfg.VERTICAL_TOLERANCE_MOVEMENT
+VERTICAL_TOLERANCE = cfg.VERTICAL_TOLERANCE
 
-maxDisappeared = 5
+MAX_DISAPPEARED = cfg.MAX_DISAPPEARED
 
 class centroidtracker():
-    def __init__(self, maxDisappeared = maxDisappeared):
+    def __init__(self, MAX_DISAPPEARED = MAX_DISAPPEARED):
         # initialize the next unique object ID along with two ordered
         # dictionaries used to keep track of mapping a given object
         # ID to its centroid and number of consecutive frames it has
@@ -29,7 +28,7 @@ class centroidtracker():
         # store the number of maximum consecutive frames a given
         # object is allowed to be marked as "disappeared" until we
         # need to deregister the object from tracking
-        self.maxDisappeared = maxDisappeared
+        self.MAX_DISAPPEARED = MAX_DISAPPEARED
 
     def register(self, centroid):
         # when registering an object we use the next available object
@@ -54,7 +53,7 @@ class centroidtracker():
         frame_timestamp = int(round(time.time()*1000))
 
         #create db connection
-        conn = db.create_connection(r"database.db")
+        conn = db.create_connection(cfg.DATABASE_PATH)
 
         # check to see if the list of input bounding box rectangles
         # is empty
@@ -64,7 +63,7 @@ class centroidtracker():
             for objectID in list(self.disappeared.keys()):
                 self.continued_movement[objectID] = False
                 self.disappeared[objectID] += 1
-                self.continueMovement(objectID, verticalToleranceMovement)
+                self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
                 self.pre_previousPos[objectID] = self.previousPos[objectID]
                 self.previousPos[objectID] = self.objects[objectID]
                 # if we have reached a maximum of consecutive
@@ -75,7 +74,7 @@ class centroidtracker():
                     self.deregister(objectID)
                 elif self.objects[objectID][1] > 327 and self.objects[objectID][0] > 1230:
                     self.deregister(objectID)
-                elif self.disappeared[objectID] > self.maxDisappeared:
+                elif self.disappeared[objectID] > self.MAX_DISAPPEARED:
                         self.deregister(objectID)
                 else:
                         #create tuple with data
@@ -145,7 +144,7 @@ class centroidtracker():
                 #check if distance between objectCentroid and detetcted car is smaller than certain value
                 if D[row][col] < 200:
                     #check if vertical distance is smaller than certain value
-                    if abs(self.objects[objectIDs[row]][1] - inputCentroids[col][1]) < verticalTolerance:
+                    if abs(self.objects[objectIDs[row]][1] - inputCentroids[col][1]) < VERTICAL_TOLERANCE:
                         objectID = objectIDs[row]
                         self.objects[objectID] = inputCentroids[col]
                         self.disappeared[objectID] = 0
@@ -174,7 +173,7 @@ class centroidtracker():
                     self.continued_movement[objectID] = False
 
                     self.disappeared[objectID] += 1
-                    self.continueMovement(objectID, verticalToleranceMovement)
+                    self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
                     self.pre_previousPos[objectID] = self.previousPos[objectID]
                     self.previousPos[objectID] = self.objects[objectID]
                     # check to see if the number of consecutive
@@ -185,7 +184,7 @@ class centroidtracker():
                         self.deregister(objectID)
                     elif objectCentroids[row][1] > 324 and objectCentroids[row][0] > 1230:
                         self.deregister(objectID)
-                    elif self.disappeared[objectID] > self.maxDisappeared:
+                    elif self.disappeared[objectID] > self.MAX_DISAPPEARED:
                             self.deregister(objectID)
                     else:
                         #create tuple with data
@@ -211,7 +210,8 @@ class centroidtracker():
     def continueMovement(self, objectID, verticalToleranceMovement):
         # check if values for the two previous positions are existent (i.e. the object has to be detected at least twice)
         if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
-            print(self.previousPos[objectID] - self.pre_previousPos[objectID])
+            if(cfg.DEBUG_MODE):
+                print(self.previousPos[objectID] - self.pre_previousPos[objectID])
             # check if vertical movement is plausible
             if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < verticalToleranceMovement:
                 if (self.objects[objectID][1] < 302 and self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0 or (self.objects[objectID][1] > 302 and self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0:

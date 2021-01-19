@@ -1,23 +1,20 @@
 import sqlite3
 from sqlite3 import Error
 
+import config as cfg
+
+
 def insert_detections(conn, object_for_db):
-
-     #pass to insert_funktion:
-            #object_id -> key von self.objects, und die jeweiligen values des keys ist ein array mit [x, y]
-            #bounding boxes: rects hat die 4 koordinaten von der bb, siehe yolo_marchripan zeile 139
-            #object_type: siehe zeile 144 von yolo_marchripan
-            # confidence: siehe selbe zeile
-            # 
-
-
     sql = """ INSERT INTO detections (timestamp, object_id, c_x, c_y, bb_w, bb_h, object_type, continued_movement, inserted_db_timestamp)
             VALUES (?,?,?,?,?,?,?,?,?) """
 
     cur = conn.cursor()
     cur.execute (sql, object_for_db)
     conn.commit()
-    #print('writing db')
+
+    if(cfg.DEBUG_MODE):
+        print('writing into db:')
+        print(object_for_db)
 
 
 def init_db(conn):
@@ -72,4 +69,4 @@ def create_connection(db_file):
 
 
 if __name__ == '__main__':
-    create_connection(r"database.db")
+    create_connection(cfg.DATABASE_PATH)
