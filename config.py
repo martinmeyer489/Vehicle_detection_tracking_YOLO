@@ -8,6 +8,14 @@
 import os
 
 
+############################################################################
+# General Settings
+DEBUG_MODE = False # prints additional messages for debugging
+HEADLESS = False # run without GUI on server
+WRITE_VIDEO = False # write a video-file
+OUTPUT_PATH = r"output\output.avi"
+VIDEO_FPS = 10 #chose a value roughly matching stream fps 
+                # if input is video then set to video fps
 
 ############################################################################
 # Input Settings
@@ -42,6 +50,4 @@ MAX_DISAPPEARED = 5 # Number of consecutive frames without detection before dere
 # Database Settings
 DATABASE_PATH = r"database.db"
 
-############################################################################
-# Output Settings
-DEBUG_MODE = False #prints additional messages for debugging
+
