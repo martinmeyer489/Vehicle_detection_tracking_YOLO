@@ -44,12 +44,12 @@ else:
 if args.output == None: 
     OUTPUT_PATH = cfg.OUTPUT_PATH
 else:
-    OUTPUT_PATH = args.output_path
+    OUTPUT_PATH = args.output
 
 if WRITE_VIDEO:
     print("[INFO] Will write images into output file")
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter('output_test.avi', fourcc, VIDEO_FPS, (800, 600))
+    out = cv2.VideoWriter(OUTPUT_PATH, fourcc, VIDEO_FPS, (800, 600))
 
 if args.input == None:
     YOLO_INPUT = cfg.YOLO_INPUT
@@ -101,18 +101,23 @@ def main():
     fps = FPS().start()
 
     (W, H) = (None, None)
+    try:
+        while True:
+            # read the next frame from stream
+            (grabbed, frame) = vs.read()
 
-    while True:
-        # read the next frame from stream
-        (grabbed, frame) = vs.read()
-
-        if not grabbed:
-            print('[ERROR] unable to grab input - check connection or link')
-            break
-        track_cars(frame, "live frame: " + str(fps._numFrames))
-        fps.update()
-        if cv2.waitKey(1) == ord('q'):
-            break
+            if not grabbed:
+                print('[ERROR] unable to grab input - check connection or link')
+                break
+            track_cars(frame, "live frame: " + str(fps._numFrames))
+            fps.update()
+            if not HEADLESS:
+                if cv2.waitKey(1) == ord('q'):
+                    break
+    except KeyboardInterrupt:
+        #this does not seem to work on windows but might on Ubuntu
+        print('[INFO] Keyboard Interrupt - Terminating Process')
+        pass
 
     # stop the timer and display FPS information
     fps.stop()
