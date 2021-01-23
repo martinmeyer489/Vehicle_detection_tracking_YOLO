@@ -22,6 +22,7 @@ cli_parser.add_argument('-write_video', action = 'store_true')
 cli_parser.add_argument('-video_fps', action = 'store', type = int)
 cli_parser.add_argument('-input', action = 'store', type = str)
 cli_parser.add_argument('-output', action = 'store', type = str)
+cli_parser.add_argument('-limit_fps', action = 'store', type = int)
 
 args = cli_parser.parse_args()
 
@@ -45,6 +46,13 @@ if args.output == None:
     OUTPUT_PATH = cfg.OUTPUT_PATH
 else:
     OUTPUT_PATH = args.output
+
+if args.limit_fps == None:
+    LIMIT_FPS = cfg.LIMIT_FPS
+else:
+    LIMIT_FPS = args.limit_fps
+
+MIN_LOOP_DUR = (1/LIMIT_FPS)*1000 # In ms, to limit FPS
 
 if WRITE_VIDEO:
     print("[INFO] Will write images into output file")
@@ -103,6 +111,7 @@ def main():
     (W, H) = (None, None)
     try:
         while True:
+            loop_start = int(round(time.time()*1000))
             # read the next frame from stream
             (grabbed, frame) = vs.read()
 
@@ -114,6 +123,10 @@ def main():
             if not HEADLESS:
                 if cv2.waitKey(1) == ord('q'):
                     break
+            loop_duration = loop_start = int(round(time.time()*1000)) - loop_start
+            if loop_duration < MIN_LOOP_DUR: 
+                time.sleep((MIN_LOOP_DUR-loop_duration)/1000)
+
     except KeyboardInterrupt:
         #this does not seem to work on windows but might on Ubuntu
         print('[INFO] Keyboard Interrupt - Terminating Process')

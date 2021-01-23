@@ -14,8 +14,10 @@ DEBUG_MODE = False # prints additional messages for debugging
 HEADLESS = False # run without GUI on server
 WRITE_VIDEO = False # write a video-file
 OUTPUT_PATH = "output.avi"
-VIDEO_FPS = 10 #chose a value roughly matching stream fps 
-                # if input is video then set to video fps
+VIDEO_FPS = 10  # FPS Rate of output video
+LIMIT_FPS = 10  # FPS Limit for tracking-algorithm 
+
+                
 
 ############################################################################
 # Input Settings
