@@ -79,7 +79,7 @@ class centroidtracker():
                 else:
                         #create tuple with data
                         object_for_db = (frame_timestamp, objectID, self.objects[objectID][0], self.objects[objectID][1], 0, 0, \
-                                            'car', self.continued_movement[objectID], int(round(time.time()*1000)) )
+                                            'car', 0, self.continued_movement[objectID], int(round(time.time()*1000)) )
 
                         db.insert_detections(conn, object_for_db)
 
@@ -189,7 +189,7 @@ class centroidtracker():
                     else:
                         #create tuple with data
                         object_for_db = (frame_timestamp, objectID, int(self.objects[objectID][0]), int(self.objects[objectID][1]), 0, 0, \
-                            'car', self.continued_movement[objectID], int(round(time.time()*1000)) )
+                            'car', 0, self.continued_movement[objectID], int(round(time.time()*1000)) )
                         #print(object_for_db)
                         db.insert_detections(conn, object_for_db)
 

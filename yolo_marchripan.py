@@ -16,6 +16,10 @@ from tracking.centroidtracker import centroidtracker
 # Settings
 # Read settings from config.py or command line flags
 
+
+#TODO ADD HELP TEXT
+#TODO Standardwerte auf config sachen setzen! 
+#TODO Write DB flag?
 cli_parser = argparse.ArgumentParser(description='Marchripan Vehicle Tracker')
 cli_parser.add_argument('-headless', action = 'store_true')
 cli_parser.add_argument('-write_video', action = 'store_true')
@@ -37,11 +41,6 @@ if args.write_video == False:
 else:
     WRITE_VIDEO = args.write_video
 
-if args.video_fps == None:
-    VIDEO_FPS = cfg.VIDEO_FPS
-else:
-    VIDEO_FPS = args.video_fps
-
 if args.output == None: 
     OUTPUT_PATH = cfg.OUTPUT_PATH
 else:
@@ -51,6 +50,13 @@ if args.limit_fps == None:
     LIMIT_FPS = cfg.LIMIT_FPS
 else:
     LIMIT_FPS = args.limit_fps
+
+if args.video_fps == None:
+    if args.limit_fps == None:
+        VIDEO_FPS = cfg.VIDEO_FPS
+    else: VIDEO_FPS = LIMIT_FPS
+else:
+    VIDEO_FPS = args.video_fps
 
 MIN_LOOP_DUR = (1/LIMIT_FPS)*1000 # In ms, to limit FPS
 

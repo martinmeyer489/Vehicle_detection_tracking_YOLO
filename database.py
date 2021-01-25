@@ -5,8 +5,8 @@ import config as cfg
 
 
 def insert_detections(conn, object_for_db):
-    sql = """ INSERT INTO detections (timestamp, object_id, c_x, c_y, bb_w, bb_h, object_type, continued_movement, inserted_db_timestamp)
-            VALUES (?,?,?,?,?,?,?,?,?) """
+    sql = """ INSERT INTO detections (timestamp, object_id, c_x, c_y, bb_w, bb_h, object_type, confidence, continued_movement, inserted_db_timestamp)
+            VALUES (?,?,?,?,?,?,?,?,?,?) """
 
     cur = conn.cursor()
     cur.execute (sql, object_for_db)
