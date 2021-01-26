@@ -6,14 +6,14 @@ import database as db
 import numpy as np
 from scipy.spatial import distance as dist
 
-
 VERTICAL_TOLERANCE_MOVEMENT = cfg.VERTICAL_TOLERANCE_MOVEMENT
 VERTICAL_TOLERANCE = cfg.VERTICAL_TOLERANCE
 
 MAX_DISAPPEARED = cfg.MAX_DISAPPEARED
 
+
 class centroidtracker():
-    def __init__(self, MAX_DISAPPEARED = MAX_DISAPPEARED):
+    def __init__(self, MAX_DISAPPEARED=MAX_DISAPPEARED):
         # initialize the next unique object ID along with two ordered
         # dictionaries used to keep track of mapping a given object
         # ID to its centroid and number of consecutive frames it has
@@ -44,9 +44,8 @@ class centroidtracker():
         self.length[self.nextObjectID] = bbox[0]
         self.height[self.nextObjectID] = bbox[1]
         self.conf[self.nextObjectID] = conf
-        
-        self.nextObjectID += 1
 
+        self.nextObjectID += 1
 
     def deregister(self, objectID):
         # to deregister an object ID we delete the object ID from
@@ -56,15 +55,15 @@ class centroidtracker():
         del self.pre_previousPos[objectID]
         del self.disappeared[objectID]
         del self.continued_movement[objectID]
-        del self.length[objectID] 
+        del self.length[objectID]
         del self.height[objectID]
         del self.conf[objectID]
 
     def update(self, rects, confidences):
-        #create current timestamp in ms
-        frame_timestamp = int(round(time.time()*1000))
+        # create current timestamp in ms
+        frame_timestamp = int(round(time.time() * 1000))
 
-        #create db connection
+        # create db connection
         conn = db.create_connection(cfg.DATABASE_PATH)
 
         # check to see if the list of input bounding box rectangles
@@ -87,14 +86,11 @@ class centroidtracker():
                 elif self.objects[objectID][1] > 327 and self.objects[objectID][0] > 1230:
                     self.deregister(objectID)
                 elif self.disappeared[objectID] > self.MAX_DISAPPEARED:
-                        self.deregister(objectID)
-                else:
-                        #create tuple with data
-                        object_for_db = (frame_timestamp, objectID, self.objects[objectID][0], self.objects[objectID][1], self.length[objectID], \
-                                            self.height[objectID], 'car', self.conf[objectID], self.continued_movement[objectID], int(round(time.time()*1000)) )
+                    self.deregister(objectID)
 
-                        db.insert_detections(conn, object_for_db)
-
+            # add each object to database
+            for objectID in self.objects.keys():
+                self.addToDatabase(frame_timestamp, conn, objectID)
             # return early as there are no centroids or tracking info
             # to update
             return self.objects
@@ -108,15 +104,16 @@ class centroidtracker():
             cX = int((startX + endX) / 2.0)
             cY = int((startY + endY) / 2.0)
             inputCentroids[i] = (cX, cY)
-            inputBBoxes[i] = (endX-startX, endY-startY)
+            inputBBoxes[i] = (endX - startX, endY - startY)
         # if we are currently not tracking any objects take the input
         # centroids and register each of them
         if len(self.objects) == 0:
             for i in range(0, len(inputCentroids)):
                 # check if vehicle is not on edge of lane
                 if (inputCentroids[i][1] < 277 and inputCentroids[i][0] >= 50) or \
-                (inputCentroids[i][1] > 327 and inputCentroids[i][0] <= 1230):
+                        (inputCentroids[i][1] > 327 and inputCentroids[i][0] <= 1230):
                     self.register(inputCentroids[i], inputBBoxes[i], confidences[i])
+
                 # otherwise, are are currently tracking objects so we need to
                 # try to match the input centroids to existing object centroids
         else:
@@ -155,9 +152,9 @@ class centroidtracker():
                 # set its new centroid, and reset the disappeared
                 # counter
 
-                #check if distance between objectCentroid and detetcted car is smaller than certain value
+                # check if distance between objectCentroid and detetcted car is smaller than certain value
                 if D[row][col] < 200:
-                    #check if vertical distance is smaller than certain value
+                    # check if vertical distance is smaller than certain value
                     if abs(self.objects[objectIDs[row]][1] - inputCentroids[col][1]) < VERTICAL_TOLERANCE:
                         objectID = objectIDs[row]
                         self.objects[objectID] = inputCentroids[col]
@@ -202,15 +199,7 @@ class centroidtracker():
                     elif objectCentroids[row][1] > 324 and objectCentroids[row][0] > 1230:
                         self.deregister(objectID)
                     elif self.disappeared[objectID] > self.MAX_DISAPPEARED:
-                            self.deregister(objectID)
-                    else:
-                        #create tuple with data
-                        object_for_db = (frame_timestamp, int(objectID), int(self.objects[objectID][0]), int(self.objects[objectID][1]), int(self.length[objectID]), \
-                                            int(self.height[objectID]), 'car', self.conf[objectID], self.continued_movement[objectID], int(round(time.time()*1000)) )
-                        #print(object_for_db)
-                        db.insert_detections(conn, object_for_db)
-
-
+                        self.deregister(objectID)
 
             # otherwise, if the number of input centroids is greater
             # than the number of existing object centroids we need to
@@ -218,19 +207,32 @@ class centroidtracker():
             else:
                 for col in unusedCols:
                     if (inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50) or \
-                    (inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230):
+                            (inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230):
                         self.register(inputCentroids[col], inputBBoxes[col], confidences[col])
 
+        # add each object to database
+        for objectID in self.objects.keys():
+            self.addToDatabase(frame_timestamp, conn, objectID)
         # return the set of trackable objects        
         return self.objects
 
     def continueMovement(self, objectID, verticalToleranceMovement):
         # check if values for the two previous positions are existent (i.e. the object has to be detected at least twice)
         if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
-            if(cfg.DEBUG_MODE):
+            if (cfg.DEBUG_MODE):
                 print(self.previousPos[objectID] - self.pre_previousPos[objectID])
             # check if vertical movement is plausible
             if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < verticalToleranceMovement:
-                if (self.objects[objectID][1] < 302 and self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0 or (self.objects[objectID][1] > 302 and self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0:
-                    self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
+                if (self.objects[objectID][1] < 302 and self.previousPos[objectID][0] - self.pre_previousPos[objectID][
+                    0]) < 0 or (self.objects[objectID][1] > 302 and self.previousPos[objectID][0] -
+                                self.pre_previousPos[objectID][0]) > 0:
+                    self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[
+                        objectID]
                     self.continued_movement[self.nextObjectID] = True
+
+    def addToDatabase(self, frame_timestamp, conn, objectID):
+        object_for_db = (frame_timestamp, objectID, int(self.objects[objectID][0]), self.objects[objectID][1],
+                             self.length[objectID], \
+                             self.height[objectID], 'car', self.conf[objectID],
+                             self.continued_movement[objectID], int(round(time.time() * 1000)))
+        db.insert_detections(conn, object_for_db)
