@@ -10,7 +10,7 @@ import numpy as np
 from imutils.video import FPS
 
 import config as cfg
-from tracking.centroidtracker import centroidtracker
+from centroidtracker import centroidtracker
 
 ############################################################################
 # Settings
@@ -198,7 +198,7 @@ def track_cars(frame, frame_no):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
     # update our centroid tracker using the computed set of bounding
     # box rectangles
-    objects = ct.update(rects)
+    objects = ct.update(rects, confidences)
     # loop over the tracked objects
     for (objectID, centroid) in objects.items():
         # draw both the ID of the object and the centroid of the
