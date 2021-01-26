@@ -231,8 +231,8 @@ class centroidtracker():
                     self.continued_movement[self.nextObjectID] = True
 
     def addToDatabase(self, frame_timestamp, conn, objectID):
-        object_for_db = (frame_timestamp, objectID, int(self.objects[objectID][0]), self.objects[objectID][1],
-                             self.length[objectID], \
-                             self.height[objectID], 'car', self.conf[objectID],
+        object_for_db = (frame_timestamp, objectID, int(self.objects[objectID][0]), int(self.objects[objectID][1]),
+                             int(self.length[objectID]), \
+                             int(self.height[objectID]), 'car', self.conf[objectID],
                              self.continued_movement[objectID], int(round(time.time() * 1000)))
         db.insert_detections(conn, object_for_db)
