@@ -4,17 +4,19 @@ from sqlite3 import Error
 import config as cfg
 
 
-def insert_detections(conn, object_for_db):
+def insert_detections(conn, DBList):
     sql = """ INSERT INTO detections (timestamp, object_id, c_x, c_y, bb_w, bb_h, object_type, confidence, continued_movement, inserted_db_timestamp)
             VALUES (?,?,?,?,?,?,?,?,?,?) """
 
     cur = conn.cursor()
-    cur.execute (sql, object_for_db)
-    conn.commit()
 
-    if(cfg.DEBUG_MODE):
-        print('writing into db:')
-        print(object_for_db)
+    for line in DBList: 
+        cur.execute (sql, line)
+        conn.commit()
+
+        if(cfg.DEBUG_MODE):
+            print('writing into db:')
+            print(line)
 
 
 def init_db(conn):
@@ -34,7 +36,6 @@ def init_db(conn):
                                     inserted_db_timestamp integer NOT NULL,
                                     PRIMARY KEY (timestamp, object_id)
                                 );"""
-
     create_table(conn, sql_create_detections_table)
 
 

@@ -27,6 +27,7 @@ class centroidtracker():
         self.length = OrderedDict()
         self.height = OrderedDict()
         self.conf = OrderedDict()
+        self.DBList = [] 
 
         # store the number of maximum consecutive frames a given
         # object is allowed to be marked as "disappeared" until we
@@ -90,9 +91,10 @@ class centroidtracker():
 
             # add each object to database
             for objectID in self.objects.keys():
-                self.addToDatabase(frame_timestamp, conn, objectID)
+                self.addToDatabase(frame_timestamp, objectID)
             # return early as there are no centroids or tracking info
             # to update
+            self.pushToDatabase(conn)
             return self.objects
 
         # initialize an array of input centroids for the current frame
@@ -212,8 +214,9 @@ class centroidtracker():
 
         # add each object to database
         for objectID in self.objects.keys():
-            self.addToDatabase(frame_timestamp, conn, objectID)
+            self.addToDatabase(frame_timestamp, objectID)
         # return the set of trackable objects        
+        self.pushToDatabase(conn)
         return self.objects
 
     def continueMovement(self, objectID, verticalToleranceMovement):
@@ -228,11 +231,26 @@ class centroidtracker():
                                 self.pre_previousPos[objectID][0]) > 0:
                     self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[
                         objectID]
-                    self.continued_movement[self.nextObjectID] = True
+                    #print('Continued Movement=true!')
+                    self.continued_movement[objectID] = True
 
-    def addToDatabase(self, frame_timestamp, conn, objectID):
-        object_for_db = (frame_timestamp, objectID, int(self.objects[objectID][0]), int(self.objects[objectID][1]),
-                             int(self.length[objectID]), \
-                             int(self.height[objectID]), 'car', self.conf[objectID],
-                             self.continued_movement[objectID], int(round(time.time() * 1000)))
-        db.insert_detections(conn, object_for_db)
+    def addToDatabase(self, frame_timestamp, objectID):
+        object_for_db = (frame_timestamp, 
+                            objectID, 
+                            int(self.objects[objectID][0]), 
+                            int(self.objects[objectID][1]),
+                            int(self.length[objectID]),
+                            int(self.height[objectID]), 
+                            'car', 
+                            self.conf[objectID],
+                            self.continued_movement[objectID], 
+                            int(round(time.time() * 1000)))
+        #print('write:', self.continued_movement[objectID])
+        self.DBList.append(object_for_db)
+        #db.insert_detections(conn, object_for_db)
+
+    def pushToDatabase(self, conn):
+        #print(self.DBList)
+        if len(self.DBList) > 0:
+            db.insert_detections(conn, self.DBList)
+        self.DBList = []

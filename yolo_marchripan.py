@@ -20,6 +20,7 @@ from centroidtracker import centroidtracker
 #TODO ADD HELP TEXT
 #TODO Standardwerte auf config sachen setzen! 
 #TODO Write DB flag?
+#TODO Debug Flag
 cli_parser = argparse.ArgumentParser(description='Marchripan Vehicle Tracker')
 cli_parser.add_argument('-headless', action = 'store_true')
 cli_parser.add_argument('-write_video', action = 'store_true')
