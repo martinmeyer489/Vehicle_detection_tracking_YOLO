@@ -5,7 +5,7 @@ import config as cfg
 
 
 def insert_detections(conn, DBList):
-    sql = """ INSERT INTO detections (timestamp, object_id, c_x, c_y, bb_w, bb_h, object_type, confidence, continued_movement, inserted_db_timestamp)
+    sql = """ INSERT INTO detections (timestamp, object_id, c_x, c_y, bb_w, bb_h, class_id, confidence, continued_movement, inserted_db_timestamp)
             VALUES (?,?,?,?,?,?,?,?,?,?) """
 
     cur = conn.cursor()
@@ -20,8 +20,7 @@ def insert_detections(conn, DBList):
 
 
 def init_db(conn):
-    """ create the tables etc, if they dont already exist
-    """ 
+    # if db does not exist, initialize tables
 
     sql_create_detections_table = """CREATE TABLE IF NOT EXISTS detections (
                                     timestamp integer NOT NULL,
@@ -30,13 +29,30 @@ def init_db(conn):
                                     c_y integer NOT NULL,
                                     bb_w integer,
                                     bb_h integer,
-                                    object_type text,
+                                    class_id integer,
                                     confidence double,
                                     continued_movement boolean,
                                     inserted_db_timestamp integer NOT NULL,
                                     PRIMARY KEY (timestamp, object_id)
                                 );"""
+    
     create_table(conn, sql_create_detections_table)
+
+    sql_create_class_id_table = """CREATE TABLE IF NOT EXISTS classes (
+                                    class_id integer NOT NULL,
+                                    class_label string NOT NULL,
+                                    PRIMARY KEY (class_id)
+                                );"""
+    
+    create_table(conn, sql_create_class_id_table)
+
+    sql_insert_classes = """INSERT OR IGNORE INTO classes (class_id, class_label) VALUES (?, ?)"""
+
+    cur = conn.cursor()
+
+    for line in cfg.CLASSES: 
+        cur.execute (sql_insert_classes, line)
+        conn.commit()   
 
 
 def create_table(conn, create_table_sql):

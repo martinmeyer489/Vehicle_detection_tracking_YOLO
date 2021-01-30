@@ -52,4 +52,11 @@ MAX_DISAPPEARED = 5 # Number of consecutive frames without detection before dere
 # Database Settings
 DATABASE_PATH = r"database.db"
 
+CLASSES = [ # List of Lists [class_id, class_name], used to initialize classes DB. Should be like coco.names
+                    [0, "bus"],
+                    [1, "car"],
+                    [2, "motorcycle"],
+                    [3, "person"]
+                ]
+
 

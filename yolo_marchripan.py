@@ -199,7 +199,7 @@ def track_cars(frame, frame_no):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
     # update our centroid tracker using the computed set of bounding
     # box rectangles
-    objects = ct.update(rects, confidences)
+    objects = ct.update(rects, confidences, class_ids)
     # loop over the tracked objects
     for (objectID, centroid) in objects.items():
         # draw both the ID of the object and the centroid of the

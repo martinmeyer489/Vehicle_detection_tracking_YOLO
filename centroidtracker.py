@@ -27,6 +27,7 @@ class centroidtracker():
         self.length = OrderedDict()
         self.height = OrderedDict()
         self.conf = OrderedDict()
+        self.class_id = OrderedDict()
         self.DBList = [] 
 
         # store the number of maximum consecutive frames a given
@@ -34,7 +35,7 @@ class centroidtracker():
         # need to deregister the object from tracking
         self.MAX_DISAPPEARED = MAX_DISAPPEARED
 
-    def register(self, centroid, bbox, conf):
+    def register(self, centroid, bbox, conf, class_id):
         # when registering an object we use the next available object
         # ID to store the centroid
         self.objects[self.nextObjectID] = centroid
@@ -45,7 +46,7 @@ class centroidtracker():
         self.length[self.nextObjectID] = bbox[0]
         self.height[self.nextObjectID] = bbox[1]
         self.conf[self.nextObjectID] = conf
-
+        self.class_id[self.nextObjectID] = class_id 
         self.nextObjectID += 1
 
     def deregister(self, objectID):
@@ -59,8 +60,9 @@ class centroidtracker():
         del self.length[objectID]
         del self.height[objectID]
         del self.conf[objectID]
+        del self.class_id[objectID]
 
-    def update(self, rects, confidences):
+    def update(self, rects, confidences, class_ids):
         # create current timestamp in ms
         frame_timestamp = int(round(time.time() * 1000))
 
@@ -114,7 +116,7 @@ class centroidtracker():
                 # check if vehicle is not on edge of lane
                 if (inputCentroids[i][1] < 277 and inputCentroids[i][0] >= 50) or \
                         (inputCentroids[i][1] > 327 and inputCentroids[i][0] <= 1230):
-                    self.register(inputCentroids[i], inputBBoxes[i], confidences[i])
+                    self.register(inputCentroids[i], inputBBoxes[i], confidences[i], class_ids[i])
 
                 # otherwise, are are currently tracking objects so we need to
                 # try to match the input centroids to existing object centroids
@@ -163,6 +165,7 @@ class centroidtracker():
                         self.length[objectID] = inputBBoxes[col][0]
                         self.height[objectID] = inputBBoxes[col][1]
                         self.conf[objectID] = confidences[col]
+                        self.class_id[objectID] = class_ids[col]
                         self.disappeared[objectID] = 0
                         self.continued_movement[objectID] = False
 
@@ -210,7 +213,7 @@ class centroidtracker():
                 for col in unusedCols:
                     if (inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50) or \
                             (inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230):
-                        self.register(inputCentroids[col], inputBBoxes[col], confidences[col])
+                        self.register(inputCentroids[col], inputBBoxes[col], confidences[col], class_ids[col])
 
         # add each object to database
         for objectID in self.objects.keys():
@@ -241,7 +244,7 @@ class centroidtracker():
                             int(self.objects[objectID][1]),
                             int(self.length[objectID]),
                             int(self.height[objectID]), 
-                            'car', 
+                            int(self.class_id[objectID]), 
                             self.conf[objectID],
                             self.continued_movement[objectID], 
                             int(round(time.time() * 1000)))
