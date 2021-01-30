@@ -65,6 +65,8 @@ class centroidtracker():
     def update(self, rects, confidences, class_ids):
         # create current timestamp in ms
         frame_timestamp = int(round(time.time() * 1000))
+        frame_date = time.strftime('%Y%m%d')
+        frame_time = time.strftime('%H%M')
 
         # create db connection
         conn = db.create_connection(cfg.DATABASE_PATH)
@@ -93,7 +95,7 @@ class centroidtracker():
 
             # add each object to database
             for objectID in self.objects.keys():
-                self.addToDatabase(frame_timestamp, objectID)
+                self.addToDatabase(frame_timestamp, frame_date, frame_time, objectID)
             # return early as there are no centroids or tracking info
             # to update
             self.pushToDatabase(conn)
@@ -217,7 +219,7 @@ class centroidtracker():
 
         # add each object to database
         for objectID in self.objects.keys():
-            self.addToDatabase(frame_timestamp, objectID)
+            self.addToDatabase(frame_timestamp, frame_date, frame_time, objectID)
         # return the set of trackable objects        
         self.pushToDatabase(conn)
         return self.objects
@@ -237,8 +239,10 @@ class centroidtracker():
                     #print('Continued Movement=true!')
                     self.continued_movement[objectID] = True
 
-    def addToDatabase(self, frame_timestamp, objectID):
+    def addToDatabase(self, frame_timestamp, frame_date, frame_time, objectID):
         object_for_db = (frame_timestamp, 
+                            frame_date,
+                            frame_time,
                             objectID, 
                             int(self.objects[objectID][0]), 
                             int(self.objects[objectID][1]),

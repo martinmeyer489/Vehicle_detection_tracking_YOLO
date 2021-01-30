@@ -5,8 +5,8 @@ import config as cfg
 
 
 def insert_detections(conn, DBList):
-    sql = """ INSERT INTO detections (timestamp, object_id, c_x, c_y, bb_w, bb_h, class_id, confidence, continued_movement, inserted_db_timestamp)
-            VALUES (?,?,?,?,?,?,?,?,?,?) """
+    sql = """ INSERT INTO detections (timestamp, date, time, object_id, c_x, c_y, bb_w, bb_h, class_id, confidence, continued_movement, inserted_db_timestamp)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?) """
 
     cur = conn.cursor()
 
@@ -24,6 +24,8 @@ def init_db(conn):
 
     sql_create_detections_table = """CREATE TABLE IF NOT EXISTS detections (
                                     timestamp integer NOT NULL,
+                                    date integer NOT NULL,
+                                    time integer NOT NULL,
                                     object_id integer NOT NULL,
                                     c_x integer NOT NULL,
                                     c_y integer NOT NULL,
