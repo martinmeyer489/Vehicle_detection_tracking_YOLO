@@ -12,6 +12,7 @@ deep-sort-ausprobieren(alt)/
 *desktop.ini 
 
 *.db
+*.db-journal
 
 *.mp4
 *.avi

@@ -239,7 +239,7 @@ class centroidtracker():
                     self.continued_movement[objectID] = True
 
     def addToDatabase(self, frame_timestamp, frame_date, frame_time, objectID):
-        if not cfg.WRITE_INTO_DB:
+        if cfg.SKIP_DB:
             return
 
         object_for_db = (frame_timestamp, 
@@ -257,7 +257,7 @@ class centroidtracker():
         self.DBList.append(object_for_db)
 
     def pushToDatabase(self, conn):
-        if len(self.DBList) == 0 or not cfg.WRITE_INTO_DB:
+        if len(self.DBList) == 0 or cfg.SKIP_DB:
             return
         
         db.insert_detections(conn, self.DBList)

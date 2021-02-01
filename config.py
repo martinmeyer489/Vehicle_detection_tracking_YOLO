@@ -50,7 +50,7 @@ MAX_DISAPPEARED = 5 # Number of consecutive frames without detection before dere
 
 ############################################################################
 # Database Settings
-WRITE_INTO_DB = True
+SKIP_DB = False
 DATABASE_PATH = r"database.db"
 
 CLASSES = [ # List of Lists [class_id, class_name], used to initialize classes DB. Should be like coco.names

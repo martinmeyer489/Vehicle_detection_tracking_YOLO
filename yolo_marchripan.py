@@ -21,56 +21,65 @@ from centroidtracker import centroidtracker
 
 cli_parser = argparse.ArgumentParser(description='''Marchripan Vehicle Tracker - 
                                                 All arguments can be set permanently in config.py and need only to  
-                                                be used for quick changes or debugging purposes''')
-cli_parser.add_argument('-headless', action = 'store_true', help = 'Do not show output image on screen (for server)')
-cli_parser.add_argument('-write_video', action = 'store_true', help = 'Write output to a video file')
-cli_parser.add_argument('-video_fps', action = 'store', type = int, help = 'FPS of output video file')
-cli_parser.add_argument('-input', action = 'store', type = str, help = 'Input (URL or File Path) if different from config.py')
-cli_parser.add_argument('-output', action = 'store', type = str, help = 'Output file path if different from config.py')
-cli_parser.add_argument('-limit_fps', action = 'store', type = int, help = 'Limit Number of Frames tracked per second')
+                                                be used for quick changes or debugging purposes.
+                                                You can abbreviate the arguments as long as they stay distinct 
+                                                (i.e. -write instead of -write_video''')
+cli_parser.add_argument('-headless', action = 'store_true', default = cfg.HEADLESS, 
+                        help = 'Do not show output image on screen (for server)')
+cli_parser.add_argument('-write_video', action = 'store_true', default = cfg.WRITE_VIDEO, 
+                        help = 'Write output to a video file')
+cli_parser.add_argument('-video_fps', action = 'store', type = int, default = cfg.VIDEO_FPS,
+                        help = 'FPS of output video file')
+cli_parser.add_argument('-limit_fps', action = 'store', type = int, default = cfg.LIMIT_FPS,
+                        help = 'Limit Number of Frames tracked per second')
+cli_parser.add_argument('-input', action = 'store', type = str, default = cfg.YOLO_INPUT,
+                        help = 'Input (URL or File Path) if different from config.py')
+cli_parser.add_argument('-output', action = 'store', type = str, default = cfg.OUTPUT_PATH,
+                        help = 'Output file path if different from config.py')
+cli_parser.add_argument('-skip_db', action = 'store_true', default = cfg.SKIP_DB,
+                        help = 'Set if writing to DB should be deactivated')
+cli_parser.add_argument('-debug_output', action = 'store_true', default = cfg.DEBUG_MODE,
+                        help = 'Set if additional Debug output should be printed')
 
 args = cli_parser.parse_args()
 
-# Set argument values or read from config.py if not set
-if args.headless == False:
-    HEADLESS = cfg.HEADLESS
-else: 
+if args.headless == True: 
+    cfg.HEADLESS = args.headless
+
+if args.write_video == True:
+    cfg.WRITE_VIDEO = args.write_video
+
+if args.output != None: 
+    cfg.OUTPUT_PATH = args.output
+
+if args.limit_fps != None:
+    cfg.LIMIT_FPS = args.limit_fps
+
+if args.video_fps != None:
+    cfg.VIDEO_FPS = args.video_fps
+    if cfg.VIDEO_FPS != cfg.LIMIT_FPS:
+        print("[INFO] Writing and tracking FPS are different!")
+else:
+    cfg.VIDEO_FPS = cfg.LIMIT_FPS
+
+if args.input != None:
+    cfg.YOLO_INPUT = args.input 
+
+if args.skip_db == True: 
+    cfg.SKIP_DB = args.skip_db
+
+if args.debug_output == True: 
+    cfg.DEBUG_MODE = args.debug_output
+
+if cfg.HEADLESS:
     print('[INFO] Headless Mode - Terminate with Ctrl+C')
-    HEADLESS = args.headless
 
-if args.write_video == False:
-    WRITE_VIDEO = cfg.WRITE_VIDEO
-else:
-    WRITE_VIDEO = args.write_video
-
-if args.output == None: 
-    OUTPUT_PATH = cfg.OUTPUT_PATH
-else:
-    OUTPUT_PATH = args.output
-
-if args.limit_fps == None:
-    LIMIT_FPS = cfg.LIMIT_FPS
-else:
-    LIMIT_FPS = args.limit_fps
-
-if args.video_fps == None:
-    if args.limit_fps == None:
-        VIDEO_FPS = cfg.VIDEO_FPS
-    else: VIDEO_FPS = LIMIT_FPS
-else:
-    VIDEO_FPS = args.video_fps
-
-MIN_LOOP_DUR = (1/LIMIT_FPS)*1000 # In ms, to limit FPS
-
-if WRITE_VIDEO:
+if cfg.WRITE_VIDEO:
     print("[INFO] Will write images into output file")
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter(OUTPUT_PATH, fourcc, VIDEO_FPS, (800, 600))
+    out = cv2.VideoWriter(cfg.OUTPUT_PATH, fourcc, cfg.VIDEO_FPS, (800, 600))
 
-if args.input == None:
-    YOLO_INPUT = cfg.YOLO_INPUT
-else:
-    YOLO_INPUT = args.input 
+MIN_LOOP_DUR = (1/cfg.LIMIT_FPS)*1000 # In ms, to limit FPS
 
 YOLO_PATH = cfg.YOLO_PATH
 
@@ -112,7 +121,7 @@ def main():
     # frame dimensions
     # initialize our centroid tracker and frame dimensions
 
-    vs = cv2.VideoCapture(YOLO_INPUT)
+    vs = cv2.VideoCapture(cfg.YOLO_INPUT)
     fps = FPS().start()
 
     try:
@@ -126,7 +135,7 @@ def main():
                 break
             track_cars(frame, "live frame: " + str(fps._numFrames))
             fps.update()
-            if not HEADLESS:
+            if not cfg.HEADLESS:
                 if cv2.waitKey(1) == ord('q'):
                     print('[INFO] Keyboard Interrupt - Terminating Process')
                     break
@@ -147,13 +156,13 @@ def main():
 
     # do a bit of cleanup
     print("[INFO] cleaning up...")
-    if not HEADLESS:
+    if not cfg.HEADLESS:
         cv2.destroyAllWindows()
 
     # release the file pointers
     vs.release()
 
-    if WRITE_VIDEO:
+    if cfg.WRITE_VIDEO:
         out.release()
 
 
@@ -210,9 +219,9 @@ def track_cars(frame, frame_no):
         cv2.circle(processed_frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
 
     # Show Frame
-    if not HEADLESS:
+    if not cfg.HEADLESS:
         cv2.imshow("Frame", cv2.resize(processed_frame, (800, 600)))
-    if WRITE_VIDEO: 
+    if cfg.WRITE_VIDEO: 
         out.write(cv2.resize(processed_frame, (800, 600)))
 
 
