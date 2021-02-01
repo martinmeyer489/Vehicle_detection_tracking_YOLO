@@ -1,6 +1,5 @@
 ############################################################################
 # IMPORTS
-
 import argparse
 import os
 import time
@@ -40,20 +39,19 @@ cli_parser.add_argument('-skip_db', action = 'store_true', default = cfg.SKIP_DB
                         help = 'Set if writing to DB should be deactivated')
 cli_parser.add_argument('-debug_output', action = 'store_true', default = cfg.DEBUG_MODE,
                         help = 'Set if additional Debug output should be printed')
+cli_parser.add_argument('-hide_frame_count', action = 'store_true', default = cfg.HIDE_FRAME_COUNT,
+                        help = 'Set if FPS count should be omitted. Useful for debugging.')
 
 args = cli_parser.parse_args()
 
-if args.headless == True: 
-    cfg.HEADLESS = args.headless
-
-if args.write_video == True:
-    cfg.WRITE_VIDEO = args.write_video
-
-if args.output != None: 
-    cfg.OUTPUT_PATH = args.output
-
-if args.limit_fps != None:
-    cfg.LIMIT_FPS = args.limit_fps
+cfg.HEADLESS = args.headless
+cfg.WRITE_VIDEO = args.write_video
+cfg.OUTPUT_PATH = args.output
+cfg.LIMIT_FPS = args.limit_fps
+cfg.YOLO_INPUT = args.input 
+cfg.SKIP_DB = args.skip_db
+cfg.DEBUG_MODE = args.debug_output
+cfg.HIDE_FRAME_COUNT = args.hide_frame_count
 
 if args.video_fps != None:
     cfg.VIDEO_FPS = args.video_fps
@@ -62,15 +60,6 @@ if args.video_fps != None:
 else:
     cfg.VIDEO_FPS = cfg.LIMIT_FPS
 
-if args.input != None:
-    cfg.YOLO_INPUT = args.input 
-
-if args.skip_db == True: 
-    cfg.SKIP_DB = args.skip_db
-
-if args.debug_output == True: 
-    cfg.DEBUG_MODE = args.debug_output
-
 if cfg.HEADLESS:
     print('[INFO] Headless Mode - Terminate with Ctrl+C')
 
@@ -78,6 +67,9 @@ if cfg.WRITE_VIDEO:
     print("[INFO] Will write images into output file")
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(cfg.OUTPUT_PATH, fourcc, cfg.VIDEO_FPS, (800, 600))
+
+if cfg.HIDE_FRAME_COUNT:
+    print('[INFO] FPS Count hidden - will not output current frame!')
 
 MIN_LOOP_DUR = (1/cfg.LIMIT_FPS)*1000 # In ms, to limit FPS
 
@@ -133,7 +125,7 @@ def main():
             if not grabbed:
                 print('[ERROR] unable to grab input - check connection or link')
                 break
-            track_cars(frame, "live frame: " + str(fps._numFrames))
+            track_cars(frame, "frame: " + str(fps._numFrames))
             fps.update()
             if not cfg.HEADLESS:
                 if cv2.waitKey(1) == ord('q'):
@@ -144,7 +136,7 @@ def main():
                 time.sleep((MIN_LOOP_DUR-loop_duration)/1000)
 
     except KeyboardInterrupt:
-        #this does not seem to work on windows but might on Ubuntu
+        #this will not work correctly on windows but does on Ubuntu
         print('[INFO] Keyboard Interrupt - Terminating Process')
         pass
 
@@ -168,7 +160,8 @@ def main():
 
 # process and display framesq
 def track_cars(frame, frame_no):
-    print("[INFO] Analyzing " + str(frame_no))
+    if not cfg.HIDE_FRAME_COUNT:
+        print("[INFO] Analyzing " + str(frame_no))
 
     # resize - skipped
     # resized_frame = cv2.resize(frame, (1280, 720))
@@ -202,9 +195,11 @@ def track_cars(frame, frame_no):
             rects.append(box.astype("int"))
             # draw a bounding box rectangle and label on the frame
             color = [int(c) for c in COLORS[class_ids[i]]]
-            cv2.rectangle(processed_frame, (x, y), (x + w, y + h), color, 2)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
             text = "{}: {:.4f}".format(LABELS[class_ids[i]], confidences[i])
-            cv2.putText(processed_frame, text, (x, y - 5),
+            cv2.putText(frame, text, (x, y - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            cv2.putText(frame, str(frame_no), (10, 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
     # update our centroid tracker using the computed set of bounding
     # box rectangles
@@ -214,15 +209,15 @@ def track_cars(frame, frame_no):
         # draw both the ID of the object and the centroid of the
         # object on the output frame
         text = "ID {}".format(objectID)
-        cv2.putText(processed_frame, text, (centroid[0] - 10, centroid[1] - 10),
+        cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        cv2.circle(processed_frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
+        cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
 
     # Show Frame
     if not cfg.HEADLESS:
-        cv2.imshow("Frame", cv2.resize(processed_frame, (800, 600)))
+        cv2.imshow("Frame", cv2.resize(frame, (800, 600)))
     if cfg.WRITE_VIDEO: 
-        out.write(cv2.resize(processed_frame, (800, 600)))
+        out.write(cv2.resize(frame, (800, 600)))
 
 
 

@@ -86,11 +86,9 @@ class centroidtracker():
                 # frames where a given object has been marked as
                 # missing, deregister it
                 # first two ifs check if vehicle is on edge of lane and use different maxdisappeared if so
-                if self.objects[objectID][1] < 277 and self.objects[objectID][0] < 50:
-                    self.deregister(objectID)
-                elif self.objects[objectID][1] > 327 and self.objects[objectID][0] > 1230:
-                    self.deregister(objectID)
-                elif self.disappeared[objectID] > self.MAX_DISAPPEARED:
+                if (self.objects[objectID][1] < 277 and self.objects[objectID][0] < 50) \
+                    or (self.objects[objectID][1] > 327 and self.objects[objectID][0] > 1230) \
+                    or (self.disappeared[objectID] > self.MAX_DISAPPEARED):
                     self.deregister(objectID)
 
             # add each object to database
@@ -159,40 +157,39 @@ class centroidtracker():
                 # counter
 
                 # check if distance between objectCentroid and detetcted car is smaller than certain value
-                if D[row][col] < 200:
-                    # check if vertical distance is smaller than certain value
-                    if abs(self.objects[objectIDs[row]][1] - inputCentroids[col][1]) < VERTICAL_TOLERANCE:
-                        objectID = objectIDs[row]
-                        self.objects[objectID] = inputCentroids[col]
-                        self.length[objectID] = inputBBoxes[col][0]
-                        self.height[objectID] = inputBBoxes[col][1]
-                        self.conf[objectID] = confidences[col]
-                        self.class_id[objectID] = class_ids[col]
-                        self.disappeared[objectID] = 0
-                        self.continued_movement[objectID] = False
+                if (D[row][col] < 200) and \
+                    (abs(self.objects[objectIDs[row]][1] - inputCentroids[col][1]) < VERTICAL_TOLERANCE):
+                    objectID = objectIDs[row]
+                    self.objects[objectID] = inputCentroids[col]
+                    self.length[objectID] = inputBBoxes[col][0]
+                    self.height[objectID] = inputBBoxes[col][1]
+                    self.conf[objectID] = confidences[col]
+                    self.class_id[objectID] = class_ids[col]
+                    self.disappeared[objectID] = 0
+                    self.continued_movement[objectID] = False
 
-                        self.pre_previousPos[objectID] = self.previousPos[objectID]
-                        self.previousPos[objectID] = self.objects[objectID]
-                        # indicate that we have examined each of the row and
-                        # column indexes, respectively
-                        usedRows.add(row)
-                        usedCols.add(col)
+                    self.pre_previousPos[objectID] = self.previousPos[objectID]
+                    self.previousPos[objectID] = self.objects[objectID]
+                    # indicate that we have examined each of the row and
+                    # column indexes, respectively
+                    usedRows.add(row)
+                    usedCols.add(col)                    
+                    
             # compute both the row and column index we have NOT yet
             # examined
-            unusedRows = set(range(0, D.shape[0])).difference(usedRows)
-            unusedCols = set(range(0, D.shape[1])).difference(usedCols)
+            unusedRows = set(range(0, D.shape[0])).difference(usedRows) #object ids that could not be assigned
+            unusedCols = set(range(0, D.shape[1])).difference(usedCols) #input centroids that could not be assigned
             # in the event that the number of object centroids is
             # equal or greater than the number of input centroids
             # we need to check and see if some of these objects have
             # potentially disappeared
-            if D.shape[0] >= D.shape[1]:
+            if len(unusedRows) >= len(unusedCols): #len(unusedRows) > 0:
                 # loop over the unused row indexes
                 for row in unusedRows:
                     # grab the object ID for the corresponding row
                     # index and increment the disappeared counter
                     objectID = objectIDs[row]
                     self.continued_movement[objectID] = False
-
                     self.disappeared[objectID] += 1
                     self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
                     self.pre_previousPos[objectID] = self.previousPos[objectID]
@@ -200,21 +197,24 @@ class centroidtracker():
                     # check to see if the number of consecutive
                     # frames the object has been marked "disappeared"
                     # for warrants deregistering the object
-                    # first two ifs check if vehicle is on edge of lane and use different maxdisappeared if so
-                    if objectCentroids[row][1] < 280 and objectCentroids[row][0] < 50:
+                    # check if vehicle was on edges of the lanes or has exceeded max_disappeared
+                    if (objectCentroids[row][1] < 280 and objectCentroids[row][0] < 50) \
+                        or (objectCentroids[row][1] > 324 and objectCentroids[row][0] > 1230) \
+                        or (self.disappeared[objectID] > self.MAX_DISAPPEARED):
                         self.deregister(objectID)
-                    elif objectCentroids[row][1] > 324 and objectCentroids[row][0] > 1230:
-                        self.deregister(objectID)
-                    elif self.disappeared[objectID] > self.MAX_DISAPPEARED:
-                        self.deregister(objectID)
+
+                    usedRows.add(row)
+
+            unusedRows = set(range(0, D.shape[0])).difference(usedRows) #object ids that could not be assigned              
 
             # otherwise, if the number of input centroids is greater
             # than the number of existing object centroids we need to
             # register each new input centroid as a trackable object
-            else:
+            # shape[0] total number of rows, shape[1] total number of cols
+            if len(unusedRows) < len(unusedCols): #D.shape[0] < D.shape[1]: #len(unusedCols) > 0: 
                 for col in unusedCols:
-                    if (inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50) or \
-                            (inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230):
+                    if (inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50) \
+                        or (inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230):
                         self.register(inputCentroids[col], inputBBoxes[col], confidences[col], class_ids[col])
 
         # add each object to database
@@ -233,7 +233,7 @@ class centroidtracker():
             if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < verticalToleranceMovement:
                 if (self.objects[objectID][1] < 302 
                         and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0) \
-                        or (self.objects[objectID][1] > 302 
+                    or (self.objects[objectID][1] > 302 
                         and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
                     self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
                     self.continued_movement[objectID] = True

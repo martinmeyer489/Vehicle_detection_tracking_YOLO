@@ -16,7 +16,7 @@ WRITE_VIDEO = False # write a video-file
 OUTPUT_PATH = "output.avi"
 VIDEO_FPS = 20  # FPS Rate of output video
 LIMIT_FPS = 20  # FPS Limit for tracking-algorithm 
-
+HIDE_FRAME_COUNT = False # Dont show "Analysing Frame XYZ in console output"
                 
 
 ############################################################################
@@ -45,7 +45,7 @@ THRESHOLD = 0.1  # threshold used in non maximum supression (NMS) to filter out 
 # Tracker Settings
 VERTICAL_TOLERANCE_MOVEMENT = 5 # vertical tolerance for continuing movement of unassgined IDs (previous to preprevious)
 VERTICAL_TOLERANCE = 10 # vertical tolerance for assign IDs (Object centroid to Input centroid)
-MAX_DISAPPEARED = 5 # Number of consecutive frames without detection before deregistering an object
+MAX_DISAPPEARED = 10 # Number of consecutive frames without detection before deregistering an object
 
 
 ############################################################################
