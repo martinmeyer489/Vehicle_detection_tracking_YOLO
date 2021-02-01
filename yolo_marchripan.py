@@ -16,21 +16,22 @@ from centroidtracker import centroidtracker
 # Settings
 # Read settings from config.py or command line flags
 
+#TODO Continue Movement bei ObjectID 29 genauer anschauen vom Video
+#TODO Parameter abchecken
 
-#TODO ADD HELP TEXT
-#TODO Standardwerte auf config sachen setzen! 
-#TODO Write DB flag?
-#TODO Debug Flag
-cli_parser = argparse.ArgumentParser(description='Marchripan Vehicle Tracker')
-cli_parser.add_argument('-headless', action = 'store_true')
-cli_parser.add_argument('-write_video', action = 'store_true')
-cli_parser.add_argument('-video_fps', action = 'store', type = int)
-cli_parser.add_argument('-input', action = 'store', type = str)
-cli_parser.add_argument('-output', action = 'store', type = str)
-cli_parser.add_argument('-limit_fps', action = 'store', type = int)
+cli_parser = argparse.ArgumentParser(description='''Marchripan Vehicle Tracker - 
+                                                All arguments can be set permanently in config.py and need only to  
+                                                be used for quick changes or debugging purposes''')
+cli_parser.add_argument('-headless', action = 'store_true', help = 'Do not show output image on screen (for server)')
+cli_parser.add_argument('-write_video', action = 'store_true', help = 'Write output to a video file')
+cli_parser.add_argument('-video_fps', action = 'store', type = int, help = 'FPS of output video file')
+cli_parser.add_argument('-input', action = 'store', type = str, help = 'Input (URL or File Path) if different from config.py')
+cli_parser.add_argument('-output', action = 'store', type = str, help = 'Output file path if different from config.py')
+cli_parser.add_argument('-limit_fps', action = 'store', type = int, help = 'Limit Number of Frames tracked per second')
 
 args = cli_parser.parse_args()
 
+# Set argument values or read from config.py if not set
 if args.headless == False:
     HEADLESS = cfg.HEADLESS
 else: 
@@ -85,12 +86,11 @@ np.random.seed(42)
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
 
 # derive the paths to the YOLO weights and model configuration
-WEIGHTS_PATH = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny.weights"])
-YOLO_CONFIG_PATH = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny.cfg"])
+WEIGHTS_PATH = cfg.WEIGHTS_PATH
+YOLO_CONFIG_PATH = cfg.YOLO_CONFIG_PATH
 
 # Feature Toggles
 REGION_OF_INTEREST = cfg.REGION_OF_INTEREST
-
 
 
 ############################################################################
@@ -115,7 +115,6 @@ def main():
     vs = cv2.VideoCapture(YOLO_INPUT)
     fps = FPS().start()
 
-    (W, H) = (None, None)
     try:
         while True:
             loop_start = int(round(time.time()*1000))
@@ -129,6 +128,7 @@ def main():
             fps.update()
             if not HEADLESS:
                 if cv2.waitKey(1) == ord('q'):
+                    print('[INFO] Keyboard Interrupt - Terminating Process')
                     break
             loop_duration = loop_start = int(round(time.time()*1000)) - loop_start
             if loop_duration < MIN_LOOP_DUR: 
@@ -159,7 +159,7 @@ def main():
 
 # process and display framesq
 def track_cars(frame, frame_no):
-    print("analyzing " + str(frame_no))
+    print("[INFO] Analyzing " + str(frame_no))
 
     # resize - skipped
     # resized_frame = cv2.resize(frame, (1280, 720))

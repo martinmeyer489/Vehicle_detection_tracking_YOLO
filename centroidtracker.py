@@ -228,18 +228,20 @@ class centroidtracker():
         # check if values for the two previous positions are existent (i.e. the object has to be detected at least twice)
         if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
             if (cfg.DEBUG_MODE):
-                print(self.previousPos[objectID] - self.pre_previousPos[objectID])
+                print("[DEBUG] - Continue Movement: ", self.previousPos[objectID] - self.pre_previousPos[objectID])
             # check if vertical movement is plausible
             if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < verticalToleranceMovement:
-                if (self.objects[objectID][1] < 302 and self.previousPos[objectID][0] - self.pre_previousPos[objectID][
-                    0]) < 0 or (self.objects[objectID][1] > 302 and self.previousPos[objectID][0] -
-                                self.pre_previousPos[objectID][0]) > 0:
-                    self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[
-                        objectID]
-                    #print('Continued Movement=true!')
+                if (self.objects[objectID][1] < 302 
+                        and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0) \
+                        or (self.objects[objectID][1] > 302 
+                        and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
+                    self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
                     self.continued_movement[objectID] = True
 
     def addToDatabase(self, frame_timestamp, frame_date, frame_time, objectID):
+        if not cfg.WRITE_INTO_DB:
+            return
+
         object_for_db = (frame_timestamp, 
                             frame_date,
                             frame_time,
@@ -252,12 +254,11 @@ class centroidtracker():
                             self.conf[objectID],
                             self.continued_movement[objectID], 
                             int(round(time.time() * 1000)))
-        #print('write:', self.continued_movement[objectID])
         self.DBList.append(object_for_db)
-        #db.insert_detections(conn, object_for_db)
 
     def pushToDatabase(self, conn):
-        #print(self.DBList)
-        if len(self.DBList) > 0:
-            db.insert_detections(conn, self.DBList)
+        if len(self.DBList) == 0 or not cfg.WRITE_INTO_DB:
+            return
+        
+        db.insert_detections(conn, self.DBList)
         self.DBList = []

@@ -15,7 +15,7 @@ def insert_detections(conn, DBList):
         conn.commit()
 
         if(cfg.DEBUG_MODE):
-            print('writing into db:')
+            print('[DEBUG] - Database: Writing into db:')
             print(line)
 
 
