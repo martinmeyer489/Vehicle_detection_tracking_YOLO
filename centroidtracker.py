@@ -26,6 +26,7 @@ class centroidtracker():
         self.objects = OrderedDict()
         self.disappeared = OrderedDict()
         self.continued_movement = OrderedDict()
+        self.lastValidMovement = OrderedDict()
         self.length = OrderedDict()
         self.height = OrderedDict()
         self.conf = OrderedDict()
@@ -41,10 +42,11 @@ class centroidtracker():
         # when registering an object we use the next available object
         # ID to store the centroid
         self.objects[self.nextObjectID] = centroid
-        self.previousPos[self.nextObjectID] = None
-        self.pre_previousPos[self.nextObjectID] = None
+        self.previousPos[self.nextObjectID] = centroid 
+        self.pre_previousPos[self.nextObjectID] = centroid
         self.disappeared[self.nextObjectID] = 0
         self.continued_movement[self.nextObjectID] = False
+        self.lastValidMovement[self.nextObjectID] = None
         self.length[self.nextObjectID] = bbox[0]
         self.height[self.nextObjectID] = bbox[1]
         self.conf[self.nextObjectID] = conf
@@ -59,6 +61,7 @@ class centroidtracker():
         del self.pre_previousPos[objectID]
         del self.disappeared[objectID]
         del self.continued_movement[objectID]
+        del self.lastValidMovement[objectID]
         del self.length[objectID]
         del self.height[objectID]
         del self.conf[objectID]
@@ -155,6 +158,10 @@ class centroidtracker():
                         self.continued_movement[objectID] = False
                         self.pre_previousPos[objectID] = self.previousPos[objectID]
                         self.previousPos[objectID] = self.objects[objectID]
+                        # save the movement between the last two frames (only, if it is "forward")
+                        if (self.objects[objectID][1] < 302 and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0) \
+                            or (self.objects[objectID][1] > 302 and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
+                            self.lastValidMovement[objectID] = self.previousPos[objectID] - self.pre_previousPos[objectID]
                         # indicate that we have examined each of the row and
                         # column indexes, respectively
                         usedRows.add(row)
@@ -207,11 +214,11 @@ class centroidtracker():
             if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < verticalToleranceMovement:
                 if (self.objects[objectID][1] < 302
                     and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0) \
-                        or (self.objects[objectID][1] > 302
-                            and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
-                    self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[
-                        objectID]
-                    self.continued_movement[objectID] = True
+                    or (self.objects[objectID][1] > 302
+                    and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
+                    
+                    self.objects[objectID] = self.objects[objectID] + self.lastValidMovement[objectID] 
+                    self.continued_movement[objectID] = True                  
 
     def addToDatabase(self, frame_timestamp, frame_date, frame_time, objectID):
         if cfg.SKIP_DB:
