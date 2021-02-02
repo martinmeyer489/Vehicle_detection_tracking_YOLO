@@ -5,9 +5,11 @@ import config as cfg
 import database as db
 import numpy as np
 from scipy.spatial import distance as dist
+from operator import itemgetter
 
 VERTICAL_TOLERANCE_MOVEMENT = cfg.VERTICAL_TOLERANCE_MOVEMENT
 VERTICAL_TOLERANCE = cfg.VERTICAL_TOLERANCE
+DISTANCE_TOLERANCE = cfg.DISTANCE_TOLERANCE
 
 MAX_DISAPPEARED = cfg.MAX_DISAPPEARED
 
@@ -28,7 +30,7 @@ class centroidtracker():
         self.height = OrderedDict()
         self.conf = OrderedDict()
         self.class_id = OrderedDict()
-        self.DBList = [] 
+        self.DBList = []
 
         # store the number of maximum consecutive frames a given
         # object is allowed to be marked as "disappeared" until we
@@ -46,7 +48,7 @@ class centroidtracker():
         self.length[self.nextObjectID] = bbox[0]
         self.height[self.nextObjectID] = bbox[1]
         self.conf[self.nextObjectID] = conf
-        self.class_id[self.nextObjectID] = class_id 
+        self.class_id[self.nextObjectID] = class_id
         self.nextObjectID += 1
 
     def deregister(self, objectID):
@@ -87,8 +89,8 @@ class centroidtracker():
                 # missing, deregister it
                 # first two ifs check if vehicle is on edge of lane and use different maxdisappeared if so
                 if (self.objects[objectID][1] < 277 and self.objects[objectID][0] < 50) \
-                    or (self.objects[objectID][1] > 327 and self.objects[objectID][0] > 1230) \
-                    or (self.disappeared[objectID] > self.MAX_DISAPPEARED):
+                        or (self.objects[objectID][1] > 327 and self.objects[objectID][0] > 1230) \
+                        or (self.disappeared[objectID] > self.MAX_DISAPPEARED):
                     self.deregister(objectID)
 
             # add each object to database
@@ -129,93 +131,65 @@ class centroidtracker():
             # goal will be to match an input centroid to an existing
             # object centroid
             D = dist.cdist(np.array(objectCentroids), inputCentroids)
-            # in order to perform this matching we must (1) find the
-            # smallest value in each row and then (2) sort the row
-            # indexes based on their minimum values so that the row
-            # with the smallest value is at the *front* of the index
-            # list
-            rows = D.min(axis=1).argsort()
-            # next, we perform a similar process on the columns by
-            # finding the smallest value in each column and then
-            # sorting using the previously computed row index list
-            cols = D.argmin(axis=1)[rows]
-            # in order to determine if we need to update, register,
-            # or deregister an object we need to keep track of which
-            # of the rows and column indexes we have already examined
+
+            #create sorted list of tuples of indexes and value
+            D_sorted = sorted(np.ndenumerate(D), key=itemgetter(1))
             usedRows = set()
             usedCols = set()
-            # loop over the combination of the (row, column) index
-            # tuples
-            for (row, col) in zip(rows, cols):
-                # if we have already examined either the row or
-                # column value before, ignore it
-                # val
+            for x in D_sorted:
+                row = x[0][0]
+                col = x[0][1]
+                distance = x[1]
                 if row in usedRows or col in usedCols:
                     continue
-                # otherwise, grab the object ID for the current row,
-                # set its new centroid, and reset the disappeared
-                # counter
+                else:
+                    if (distance < DISTANCE_TOLERANCE) and \
+                            (abs(self.objects[objectIDs[row]][1] - inputCentroids[col][1]) < VERTICAL_TOLERANCE):
+                        objectID = objectIDs[row]
+                        self.objects[objectID] = inputCentroids[col]
+                        self.length[objectID] = inputBBoxes[col][0]
+                        self.height[objectID] = inputBBoxes[col][1]
+                        self.conf[objectID] = confidences[col]
+                        self.class_id[objectID] = class_ids[col]
+                        self.disappeared[objectID] = 0
+                        self.continued_movement[objectID] = False
+                        self.pre_previousPos[objectID] = self.previousPos[objectID]
+                        self.previousPos[objectID] = self.objects[objectID]
+                        # indicate that we have examined each of the row and
+                        # column indexes, respectively
+                        usedRows.add(row)
+                        usedCols.add(col)
+            # compute both the row and column index we have NOT yet examined
+            unusedRows = set(range(0, D.shape[0])).difference(usedRows)  # object ids that could not be assigned
+            unusedCols = set(range(0, D.shape[1])).difference(usedCols)  # input centroids that could not be assigned
 
-                # check if distance between objectCentroid and detetcted car is smaller than certain value
-                if (D[row][col] < 200) and \
-                    (abs(self.objects[objectIDs[row]][1] - inputCentroids[col][1]) < VERTICAL_TOLERANCE):
-                    objectID = objectIDs[row]
-                    self.objects[objectID] = inputCentroids[col]
-                    self.length[objectID] = inputBBoxes[col][0]
-                    self.height[objectID] = inputBBoxes[col][1]
-                    self.conf[objectID] = confidences[col]
-                    self.class_id[objectID] = class_ids[col]
-                    self.disappeared[objectID] = 0
-                    self.continued_movement[objectID] = False
-
-                    self.pre_previousPos[objectID] = self.previousPos[objectID]
-                    self.previousPos[objectID] = self.objects[objectID]
-                    # indicate that we have examined each of the row and
-                    # column indexes, respectively
-                    usedRows.add(row)
-                    usedCols.add(col)                    
-                    
-            # compute both the row and column index we have NOT yet
-            # examined
-            unusedRows = set(range(0, D.shape[0])).difference(usedRows) #object ids that could not be assigned
-            unusedCols = set(range(0, D.shape[1])).difference(usedCols) #input centroids that could not be assigned
-            # in the event that the number of object centroids is
-            # equal or greater than the number of input centroids
-            # we need to check and see if some of these objects have
-            # potentially disappeared
-            if len(unusedRows) >= len(unusedCols): #len(unusedRows) > 0:
-                # loop over the unused row indexes
-                for row in unusedRows:
+            # loop over the unused row indexes
+            for row in unusedRows:
                     # grab the object ID for the corresponding row
                     # index and increment the disappeared counter
-                    objectID = objectIDs[row]
-                    self.continued_movement[objectID] = False
-                    self.disappeared[objectID] += 1
-                    self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
-                    self.pre_previousPos[objectID] = self.previousPos[objectID]
-                    self.previousPos[objectID] = self.objects[objectID]
+                objectID = objectIDs[row]
+                self.continued_movement[objectID] = False
+                self.disappeared[objectID] += 1
+                self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
+                self.pre_previousPos[objectID] = self.previousPos[objectID]
+                self.previousPos[objectID] = self.objects[objectID]
                     # check to see if the number of consecutive
                     # frames the object has been marked "disappeared"
                     # for warrants deregistering the object
                     # check if vehicle was on edges of the lanes or has exceeded max_disappeared
-                    if (objectCentroids[row][1] < 280 and objectCentroids[row][0] < 50) \
+                if (objectCentroids[row][1] < 280 and objectCentroids[row][0] < 50) \
                         or (objectCentroids[row][1] > 324 and objectCentroids[row][0] > 1230) \
                         or (self.disappeared[objectID] > self.MAX_DISAPPEARED):
-                        self.deregister(objectID)
+                    self.deregister(objectID)
 
-                    usedRows.add(row)
+                    #usedRows.add(row)
 
-            unusedRows = set(range(0, D.shape[0])).difference(usedRows) #object ids that could not be assigned              
-
-            # otherwise, if the number of input centroids is greater
-            # than the number of existing object centroids we need to
-            # register each new input centroid as a trackable object
-            # shape[0] total number of rows, shape[1] total number of cols
-            if len(unusedRows) < len(unusedCols): #D.shape[0] < D.shape[1]: #len(unusedCols) > 0: 
-                for col in unusedCols:
-                    if (inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50) \
+            # register each unused inputCentroid as a new object:
+            for col in unusedCols:
+                if (inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50) \
                         or (inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230):
-                        self.register(inputCentroids[col], inputBBoxes[col], confidences[col], class_ids[col])
+                    self.register(inputCentroids[col], inputBBoxes[col], confidences[col], class_ids[col])
+
 
         # add each object to database
         for objectID in self.objects.keys():
@@ -231,34 +205,35 @@ class centroidtracker():
                 print("[DEBUG] - Continue Movement: ", self.previousPos[objectID] - self.pre_previousPos[objectID])
             # check if vertical movement is plausible
             if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < verticalToleranceMovement:
-                if (self.objects[objectID][1] < 302 
-                        and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0) \
-                    or (self.objects[objectID][1] > 302 
-                        and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
-                    self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[objectID]
+                if (self.objects[objectID][1] < 302
+                    and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0) \
+                        or (self.objects[objectID][1] > 302
+                            and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
+                    self.objects[objectID] = self.objects[objectID] + self.previousPos[objectID] - self.pre_previousPos[
+                        objectID]
                     self.continued_movement[objectID] = True
 
     def addToDatabase(self, frame_timestamp, frame_date, frame_time, objectID):
         if cfg.SKIP_DB:
             return
 
-        object_for_db = (frame_timestamp, 
-                            frame_date,
-                            frame_time,
-                            objectID, 
-                            int(self.objects[objectID][0]), 
-                            int(self.objects[objectID][1]),
-                            int(self.length[objectID]),
-                            int(self.height[objectID]), 
-                            int(self.class_id[objectID]), 
-                            self.conf[objectID],
-                            self.continued_movement[objectID], 
-                            int(round(time.time() * 1000)))
+        object_for_db = (frame_timestamp,
+                         frame_date,
+                         frame_time,
+                         objectID,
+                         int(self.objects[objectID][0]),
+                         int(self.objects[objectID][1]),
+                         int(self.length[objectID]),
+                         int(self.height[objectID]),
+                         int(self.class_id[objectID]),
+                         self.conf[objectID],
+                         self.continued_movement[objectID],
+                         int(round(time.time() * 1000)))
         self.DBList.append(object_for_db)
 
     def pushToDatabase(self, conn):
         if len(self.DBList) == 0 or cfg.SKIP_DB:
             return
-        
+
         db.insert_detections(conn, self.DBList)
         self.DBList = []
