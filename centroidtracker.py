@@ -42,7 +42,7 @@ class centroidtracker():
         # when registering an object we use the next available object
         # ID to store the centroid
         self.objects[self.nextObjectID] = centroid
-        self.previousPos[self.nextObjectID] = centroid 
+        self.previousPos[self.nextObjectID] = centroid
         self.pre_previousPos[self.nextObjectID] = centroid
         self.disappeared[self.nextObjectID] = 0
         self.continued_movement[self.nextObjectID] = False
@@ -135,7 +135,7 @@ class centroidtracker():
             # object centroid
             D = dist.cdist(np.array(objectCentroids), inputCentroids)
 
-            #create sorted list of tuples of indexes and value
+            # create sorted list of tuples of indexes and value
             D_sorted = sorted(np.ndenumerate(D), key=itemgetter(1))
             usedRows = set()
             usedCols = set()
@@ -159,9 +159,12 @@ class centroidtracker():
                         self.pre_previousPos[objectID] = self.previousPos[objectID]
                         self.previousPos[objectID] = self.objects[objectID]
                         # save the movement between the last two frames (only, if it is "forward")
-                        if (self.objects[objectID][1] < 302 and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0) \
-                            or (self.objects[objectID][1] > 302 and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
-                            self.lastValidMovement[objectID] = self.previousPos[objectID] - self.pre_previousPos[objectID]
+                        if (self.objects[objectID][1] < 302 and (
+                                self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0) \
+                                or (self.objects[objectID][1] > 302 and (
+                                self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
+                            self.lastValidMovement[objectID] = self.previousPos[objectID] - self.pre_previousPos[
+                                objectID]
                         # indicate that we have examined each of the row and
                         # column indexes, respectively
                         usedRows.add(row)
@@ -172,31 +175,31 @@ class centroidtracker():
 
             # loop over the unused row indexes
             for row in unusedRows:
-                    # grab the object ID for the corresponding row
-                    # index and increment the disappeared counter
+                # grab the object ID for the corresponding row
+                # index and increment the disappeared counter
                 objectID = objectIDs[row]
                 self.continued_movement[objectID] = False
                 self.disappeared[objectID] += 1
+                print(objectID == 27)
                 self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
                 self.pre_previousPos[objectID] = self.previousPos[objectID]
                 self.previousPos[objectID] = self.objects[objectID]
-                    # check to see if the number of consecutive
-                    # frames the object has been marked "disappeared"
-                    # for warrants deregistering the object
-                    # check if vehicle was on edges of the lanes or has exceeded max_disappeared
+                # check to see if the number of consecutive
+                # frames the object has been marked "disappeared"
+                # for warrants deregistering the object
+                # check if vehicle was on edges of the lanes or has exceeded max_disappeared
                 if (objectCentroids[row][1] < 280 and objectCentroids[row][0] < 50) \
                         or (objectCentroids[row][1] > 324 and objectCentroids[row][0] > 1230) \
                         or (self.disappeared[objectID] > self.MAX_DISAPPEARED):
                     self.deregister(objectID)
 
-                    #usedRows.add(row)
+                    # usedRows.add(row)
 
             # register each unused inputCentroid as a new object:
             for col in unusedCols:
                 if (inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50) \
                         or (inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230):
                     self.register(inputCentroids[col], inputBBoxes[col], confidences[col], class_ids[col])
-
 
         # add each object to database
         for objectID in self.objects.keys():
@@ -207,18 +210,15 @@ class centroidtracker():
 
     def continueMovement(self, objectID, verticalToleranceMovement):
         # check if values for the two previous positions are existent (i.e. the object has to be detected at least twice)
-        if self.previousPos[objectID] is not None and self.pre_previousPos[objectID] is not None:
-            if (cfg.DEBUG_MODE):
-                print("[DEBUG] - Continue Movement: ", self.previousPos[objectID] - self.pre_previousPos[objectID])
+        if self.lastValidMovement[objectID] is not None:
             # check if vertical movement is plausible
-            if abs(self.previousPos[objectID][1] - self.pre_previousPos[objectID][1]) < verticalToleranceMovement:
+            if abs(self.lastValidMovement[objectID][1]) < verticalToleranceMovement:
                 if (self.objects[objectID][1] < 302
-                    and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0) \
-                    or (self.objects[objectID][1] > 302
-                    and (self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
-                    
-                    self.objects[objectID] = self.objects[objectID] + self.lastValidMovement[objectID] 
-                    self.continued_movement[objectID] = True                  
+                    and (self.lastValidMovement[objectID][0]) < 0) \
+                        or (self.objects[objectID][1] > 302
+                            and (self.lastValidMovement[objectID][0]) > 0):
+                    self.objects[objectID][0] = self.objects[objectID][0] + self.lastValidMovement[objectID][0]
+                    self.continued_movement[objectID] = True
 
     def addToDatabase(self, frame_timestamp, frame_date, frame_time, objectID):
         if cfg.SKIP_DB:
