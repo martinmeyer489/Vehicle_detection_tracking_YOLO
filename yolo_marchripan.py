@@ -48,7 +48,7 @@ cfg.HEADLESS = args.headless
 cfg.WRITE_VIDEO = args.write_video
 cfg.OUTPUT_PATH = args.output
 cfg.LIMIT_FPS = args.limit_fps
-cfg.YOLO_INPUT = args.input 
+cfg.YOLO_INPUT = args.input
 cfg.SKIP_DB = args.skip_db
 cfg.DEBUG_MODE = args.debug_output
 cfg.HIDE_FRAME_COUNT = args.hide_frame_count
@@ -70,6 +70,9 @@ if cfg.WRITE_VIDEO:
 
 if cfg.HIDE_FRAME_COUNT:
     print('[INFO] FPS Count hidden - will not output current frame!')
+
+if not cfg.YOLO_INPUT.startswith("http"):
+    cfg.IS_VIDEO_INPUT = True
 
 MIN_LOOP_DUR = (1/cfg.LIMIT_FPS)*1000 # In ms, to limit FPS
 

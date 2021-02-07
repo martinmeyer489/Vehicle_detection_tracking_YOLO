@@ -10,7 +10,6 @@ from operator import itemgetter
 VERTICAL_TOLERANCE_MOVEMENT = cfg.VERTICAL_TOLERANCE_MOVEMENT
 VERTICAL_TOLERANCE = cfg.VERTICAL_TOLERANCE
 DISTANCE_TOLERANCE = cfg.DISTANCE_TOLERANCE
-
 MAX_DISAPPEARED = cfg.MAX_DISAPPEARED
 
 
@@ -36,6 +35,8 @@ class centroidtracker():
         # object is allowed to be marked as "disappeared" until we
         # need to deregister the object from tracking
         self.MAX_DISAPPEARED = MAX_DISAPPEARED
+        self.previous_timestamp = None
+        self.time_between_frames = 1
 
     def register(self, centroid, bbox, conf, class_id):
         # when registering an object we use the next available object
@@ -70,6 +71,10 @@ class centroidtracker():
         frame_date = time.strftime('%Y%m%d')
         frame_time = time.strftime('%H%M')
 
+        if self.previous_timestamp is not None and not cfg.IS_VIDEO_INPUT:
+            self.time_between_frames = frame_timestamp - self.previous_timestamp
+
+        print(self.time_between_frames)
         # create db connection
         conn = db.create_connection(cfg.DATABASE_PATH)
 
@@ -98,6 +103,7 @@ class centroidtracker():
             # return early as there are no centroids or tracking info
             # to update
             self.pushToDatabase(conn)
+            self.previous_timestamp = frame_timestamp
             return self.objects
 
         # initialize an array of input centroids for the current frame
@@ -157,8 +163,8 @@ class centroidtracker():
                                 self.objects[objectID][0] - self.previousPos[objectID][0]) < 0) \
                                 or (self.objects[objectID][1] > 302 and (
                                 self.objects[objectID][0] - self.previousPos[objectID][0]) > 0):
-                            self.lastValidMovement[objectID] = self.objects[objectID] - self.previousPos[
-                                objectID]
+                            self.lastValidMovement[objectID] = (self.objects[objectID] - self.previousPos[
+                                objectID]) / self.time_between_frames
                         self.previousPos[objectID] = self.objects[objectID]
                         # indicate that we have examined each of the row and
                         # column indexes, respectively
@@ -199,6 +205,7 @@ class centroidtracker():
             self.addToDatabase(frame_timestamp, frame_date, frame_time, objectID)
         # return the set of trackable objects        
         self.pushToDatabase(conn)
+        self.previous_timestamp = frame_timestamp
         return self.objects
 
     def continueMovement(self, objectID, verticalToleranceMovement):
@@ -210,7 +217,8 @@ class centroidtracker():
                     and (self.lastValidMovement[objectID][0]) < 0) \
                         or (self.objects[objectID][1] > 302
                             and (self.lastValidMovement[objectID][0]) > 0):
-                    self.objects[objectID][0] = self.objects[objectID][0] + self.lastValidMovement[objectID][0]
+                    self.objects[objectID][0] = self.objects[objectID][0] + \
+                                                (self.lastValidMovement[objectID][0] * self.time_between_frames)
                     self.continued_movement[objectID] = True
 
     def addToDatabase(self, frame_timestamp, frame_date, frame_time, objectID):

@@ -22,6 +22,7 @@ HIDE_FRAME_COUNT = False # Dont show "Analysing Frame XYZ in console output"
 ############################################################################
 # Input Settings
 YOLO_INPUT = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=00"
+IS_VIDEO_INPUT = False
 
 
 ############################################################################
@@ -46,7 +47,7 @@ THRESHOLD = 0.1  # threshold used in non maximum supression (NMS) to filter out 
 DISTANCE_TOLERANCE = 70 # distance tolerance for assign IDs (Object centroid to Input centroid)
 VERTICAL_TOLERANCE_MOVEMENT = 15 # vertical tolerance for continuing movement of unassgined IDs (previous to preprevious)
 VERTICAL_TOLERANCE = 20 # vertical tolerance for assign IDs (Object centroid to Input centroid)
-MAX_DISAPPEARED = 10 # Number of consecutive frames without detection before deregistering an object
+MAX_DISAPPEARED = 15 # Number of consecutive frames without detection before deregistering an object
 
 
 ############################################################################
