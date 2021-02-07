@@ -21,7 +21,6 @@ class centroidtracker():
         # ID to its centroid and number of consecutive frames it has
         # been marked as "disappeared", respectively
         self.previousPos = OrderedDict()
-        self.pre_previousPos = OrderedDict()
         self.nextObjectID = 0
         self.objects = OrderedDict()
         self.disappeared = OrderedDict()
@@ -43,7 +42,6 @@ class centroidtracker():
         # ID to store the centroid
         self.objects[self.nextObjectID] = centroid
         self.previousPos[self.nextObjectID] = centroid
-        self.pre_previousPos[self.nextObjectID] = centroid
         self.disappeared[self.nextObjectID] = 0
         self.continued_movement[self.nextObjectID] = False
         self.lastValidMovement[self.nextObjectID] = None
@@ -58,7 +56,6 @@ class centroidtracker():
         # both of our respective dictionaries
         del self.objects[objectID]
         del self.previousPos[objectID]
-        del self.pre_previousPos[objectID]
         del self.disappeared[objectID]
         del self.continued_movement[objectID]
         del self.lastValidMovement[objectID]
@@ -85,7 +82,6 @@ class centroidtracker():
                 self.continued_movement[objectID] = False
                 self.disappeared[objectID] += 1
                 self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
-                self.pre_previousPos[objectID] = self.previousPos[objectID]
                 self.previousPos[objectID] = self.objects[objectID]
                 # if we have reached a maximum of consecutive
                 # frames where a given object has been marked as
@@ -135,7 +131,7 @@ class centroidtracker():
             # object centroid
             D = dist.cdist(np.array(objectCentroids), inputCentroids)
 
-            # create sorted list of tuples of indexes and value
+            # create sorted list of tuples of indexes and value in ascending order
             D_sorted = sorted(np.ndenumerate(D), key=itemgetter(1))
             usedRows = set()
             usedCols = set()
@@ -156,15 +152,14 @@ class centroidtracker():
                         self.class_id[objectID] = class_ids[col]
                         self.disappeared[objectID] = 0
                         self.continued_movement[objectID] = False
-                        self.pre_previousPos[objectID] = self.previousPos[objectID]
-                        self.previousPos[objectID] = self.objects[objectID]
                         # save the movement between the last two frames (only, if it is "forward")
                         if (self.objects[objectID][1] < 302 and (
-                                self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) < 0) \
+                                self.objects[objectID][0] - self.previousPos[objectID][0]) < 0) \
                                 or (self.objects[objectID][1] > 302 and (
-                                self.previousPos[objectID][0] - self.pre_previousPos[objectID][0]) > 0):
-                            self.lastValidMovement[objectID] = self.previousPos[objectID] - self.pre_previousPos[
+                                self.objects[objectID][0] - self.previousPos[objectID][0]) > 0):
+                            self.lastValidMovement[objectID] = self.objects[objectID] - self.previousPos[
                                 objectID]
+                        self.previousPos[objectID] = self.objects[objectID]
                         # indicate that we have examined each of the row and
                         # column indexes, respectively
                         usedRows.add(row)
@@ -180,9 +175,7 @@ class centroidtracker():
                 objectID = objectIDs[row]
                 self.continued_movement[objectID] = False
                 self.disappeared[objectID] += 1
-                print(objectID == 27)
                 self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
-                self.pre_previousPos[objectID] = self.previousPos[objectID]
                 self.previousPos[objectID] = self.objects[objectID]
                 # check to see if the number of consecutive
                 # frames the object has been marked "disappeared"
@@ -209,7 +202,7 @@ class centroidtracker():
         return self.objects
 
     def continueMovement(self, objectID, verticalToleranceMovement):
-        # check if values for the two previous positions are existent (i.e. the object has to be detected at least twice)
+        # check if values for the last valid movement is existing (i.e. the object has to be detected at least twice)
         if self.lastValidMovement[objectID] is not None:
             # check if vertical movement is plausible
             if abs(self.lastValidMovement[objectID][1]) < verticalToleranceMovement:
