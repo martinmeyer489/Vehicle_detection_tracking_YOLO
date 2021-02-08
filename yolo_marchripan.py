@@ -41,6 +41,8 @@ cli_parser.add_argument('-debug_output', action = 'store_true', default = cfg.DE
                         help = 'Set if additional Debug output should be printed')
 cli_parser.add_argument('-hide_frame_count', action = 'store_true', default = cfg.HIDE_FRAME_COUNT,
                         help = 'Set if FPS count should be omitted. Useful for debugging.')
+cli_parser.add_argument('-roi_off', action = 'store_false', default = cfg.REGION_OF_INTEREST,
+                        help = 'Set if FPS count should be omitted. Useful for debugging.')
 
 args = cli_parser.parse_args()
 
@@ -52,6 +54,7 @@ cfg.YOLO_INPUT = args.input
 cfg.SKIP_DB = args.skip_db
 cfg.DEBUG_MODE = args.debug_output
 cfg.HIDE_FRAME_COUNT = args.hide_frame_count
+cfg.REGION_OF_INTEREST = args.roi_off
 
 if args.video_fps != None:
     cfg.VIDEO_FPS = args.video_fps
@@ -73,6 +76,10 @@ if cfg.HIDE_FRAME_COUNT:
 
 if not cfg.YOLO_INPUT.startswith("http"):
     cfg.IS_VIDEO_INPUT = True
+    print('[INFO] Video Input detected. Some functions (continue_movement) may behave differently')
+
+if not cfg.REGION_OF_INTEREST:
+    print('[INFO] REGION OF INTEREST is currently deactivated')
 
 MIN_LOOP_DUR = (1/cfg.LIMIT_FPS)*1000 # In ms, to limit FPS
 
