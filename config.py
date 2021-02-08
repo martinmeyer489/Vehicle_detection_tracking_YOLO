@@ -6,6 +6,7 @@
 ############################################################################
 # IMPORTS
 import os
+import numpy as np
 
 
 ############################################################################
@@ -27,7 +28,29 @@ IS_VIDEO_INPUT = False
 
 ############################################################################
 # Image Settings
-REGION_OF_INTEREST = True
+REGION_OF_INTEREST = True # Skip parts of the image from being analyzed
+
+# ROI VERTICE: Each line represents 4 points [x, y] that define a square on the input image
+#              IF REGION_OF_INTEREST = TRUE, only these squares will be looked at. 
+#              One can use this to exclude i.e. parking strips
+#              One can add as many squares as neccesary 
+#              In an 1280*720 image the top left corner would be [0, 0], the bottom right [1280, 720], ...
+#              
+#              One can save multiple arrays here, just make sure to edit ROI_VERTICE to load the correct 
+
+#########
+# TUB Centercam 1
+TUB_C1 = np.array([[0, 195], [1280, 195], [1280, 280], [0, 280],
+                [0, 324], [1280, 324], [1280, 430], [0, 430]], 
+                np.int32)
+##########
+# TUB Centercam 2
+TUB_C2 = np.array([0, 0], 
+                np.int32)
+##########
+
+ROI_VERTICE = TUB_C1 # Choose the correct array from the arrays above
+
 
 
 ############################################################################

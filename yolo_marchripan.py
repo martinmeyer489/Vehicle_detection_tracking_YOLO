@@ -234,11 +234,9 @@ def process_frame(frame):
 
 def region_of_interest(frame):
     mask = np.zeros_like(frame)
-    vertices = np.array([[0, 195], [1280, 195], [1280, 280], [0, 280],
-                         [0, 324], [1280, 324], [1280, 430], [0, 430]], np.int32)
 
     # fill the mask
-    cv2.fillPoly(mask, [vertices], (255, 255, 255))
+    cv2.fillPoly(mask, [cfg.ROI_VERTICE], (255, 255, 255))
 
     # show ROI only
     masked_frame = cv2.bitwise_and(frame, mask)
