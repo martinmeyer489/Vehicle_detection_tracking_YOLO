@@ -96,19 +96,12 @@ LABELS = open(LABELS_PATH).read().strip().split("\n")
 np.random.seed(42)
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
 
-# derive the paths to the YOLO weights and model configuration
-WEIGHTS_PATH = cfg.WEIGHTS_PATH
-YOLO_CONFIG_PATH = cfg.YOLO_CONFIG_PATH
-
-# Feature Toggles
-REGION_OF_INTEREST = cfg.REGION_OF_INTEREST
-
 
 ############################################################################
 # Tracking
 
 print("[INFO] loading YOLO from disk...")
-net = cv2.dnn.readNetFromDarknet(YOLO_CONFIG_PATH, WEIGHTS_PATH)
+net = cv2.dnn.readNetFromDarknet(cfg.YOLO_CONFIG_PATH, cfg.WEIGHTS_PATH)
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
@@ -234,7 +227,7 @@ def track_cars(frame, frame_no):
 # falls es noch weiteres zum processen geben sollte.
 # sonst diese methode einfach wieder löschen und direkt region of interest aufrufen
 def process_frame(frame):
-    if REGION_OF_INTEREST:
+    if cfg.REGION_OF_INTEREST:
         frame = region_of_interest(frame)
     return frame
 
