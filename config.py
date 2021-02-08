@@ -71,6 +71,8 @@ DISTANCE_TOLERANCE = 70 # distance tolerance for assign IDs (Object centroid to 
 VERTICAL_TOLERANCE_MOVEMENT = 15 # vertical tolerance for continuing movement of unassgined IDs (previous to preprevious)
 VERTICAL_TOLERANCE = 20 # vertical tolerance for assign IDs (Object centroid to Input centroid)
 MAX_DISAPPEARED = 15 # Number of consecutive frames without detection before deregistering an object
+IGNORE_REGISTRATION_ZONES = False # Setting this to true will skip the check whether the vehicle is in a valid position for (de-)registration
+                                  # This is useful when testing other camera inputs where registration zones are not applyable or not yet configured
 
 
 ############################################################################

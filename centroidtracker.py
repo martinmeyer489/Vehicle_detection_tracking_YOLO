@@ -122,7 +122,8 @@ class centroidtracker():
             for i in range(0, len(inputCentroids)):
                 # check if vehicle is not on edge of lane
                 if (inputCentroids[i][1] < 277 and inputCentroids[i][0] >= 50) or \
-                        (inputCentroids[i][1] > 327 and inputCentroids[i][0] <= 1230):
+                        (inputCentroids[i][1] > 327 and inputCentroids[i][0] <= 1230) or \
+                            cfg.IGNORE_REGISTRATION_ZONES:
                     self.register(inputCentroids[i], inputBBoxes[i], confidences[i], class_ids[i])
 
                 # otherwise, are are currently tracking objects so we need to
@@ -196,8 +197,9 @@ class centroidtracker():
 
             # register each unused inputCentroid as a new object:
             for col in unusedCols:
-                if (inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50) \
-                        or (inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230):
+                if (inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50) or \
+                        (inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230) or \
+                            cfg.IGNORE_REGISTRATION_ZONES: 
                     self.register(inputCentroids[col], inputBBoxes[col], confidences[col], class_ids[col])
 
         # add each object to database
