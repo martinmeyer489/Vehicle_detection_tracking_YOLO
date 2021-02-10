@@ -67,10 +67,10 @@ THRESHOLD = 0.1  # threshold used in non maximum supression (NMS) to filter out 
 
 ############################################################################
 # Tracker Settings
-DISTANCE_TOLERANCE = 70 # distance tolerance for assign IDs (Object centroid to Input centroid)
+DISTANCE_TOLERANCE = 100 # distance tolerance for assign IDs (Object centroid to Input centroid)
 VERTICAL_TOLERANCE_MOVEMENT = 15 # vertical tolerance for continuing movement of unassgined IDs (previous to preprevious)
 VERTICAL_TOLERANCE = 20 # vertical tolerance for assign IDs (Object centroid to Input centroid)
-MAX_DISAPPEARED = 15 # Number of consecutive frames without detection before deregistering an object
+MAX_DISAPPEARED = 20 # Number of consecutive frames without detection before deregistering an object
 
 
 ############################################################################
