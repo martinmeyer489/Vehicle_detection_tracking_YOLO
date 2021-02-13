@@ -16,7 +16,7 @@ HEADLESS = False # run without GUI on server
 WRITE_VIDEO = False # write a video-file
 OUTPUT_PATH = "output.avi"
 VIDEO_FPS = 20  # FPS Rate of output video
-LIMIT_FPS = 16  # FPS Limit for tracking-algorithm
+LIMIT_FPS = 30  # FPS Limit for tracking-algorithm
 HIDE_FRAME_COUNT = False # Dont show "Analysing Frame XYZ in console output"
                 
 
@@ -58,8 +58,8 @@ ROI_VERTICE = TUB_C1 # Choose the correct array from the arrays above
 YOLO_PATH = "yolo-coco"
 LABELS_PATH = os.path.sep.join([YOLO_PATH, "coco2.names"])
 
-WEIGHTS_PATH = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny.weights"])
-YOLO_CONFIG_PATH = os.path.sep.join([YOLO_PATH, "custom-yolov4-tiny.cfg"])
+WEIGHTS_PATH = os.path.sep.join([YOLO_PATH, "all_car.weights"])
+YOLO_CONFIG_PATH = os.path.sep.join([YOLO_PATH, "all_car.cfg"])
 
 CONFIDENCE = 0.01  # probability for a certain class (std: 0.5)
 THRESHOLD = 0.1  # threshold used in non maximum supression (NMS) to filter out overlapping boxes (std: 0.4)
@@ -67,7 +67,7 @@ THRESHOLD = 0.1  # threshold used in non maximum supression (NMS) to filter out 
 
 ############################################################################
 # Tracker Settings
-DISTANCE_TOLERANCE = 100 # distance tolerance for assign IDs (Object centroid to Input centroid)
+DISTANCE_TOLERANCE = 140 # distance tolerance for assign IDs (Object centroid to Input centroid)
 VERTICAL_TOLERANCE_MOVEMENT = 15 # vertical tolerance for continuing movement of unassgined IDs (previous to preprevious)
 VERTICAL_TOLERANCE = 20 # vertical tolerance for assign IDs (Object centroid to Input centroid)
 MAX_DISAPPEARED = 20 # Number of consecutive frames without detection before deregistering an object
@@ -79,10 +79,7 @@ SKIP_DB = False
 DATABASE_PATH = r"database.db"
 
 CLASSES = [ # List of Lists [class_id, class_name], used to initialize classes DB. Should be like coco.names
-                [0, "bus"],
-                [1, "car"],
-                [2, "motorcycle"],
-                [3, "person"]
+                [0, "car"]
             ]
 
 
