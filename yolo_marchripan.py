@@ -43,7 +43,7 @@ cli_parser.add_argument('-hide_frame_count', action = 'store_true', default = cf
                         help = 'Set if FPS count should be omitted. Useful for debugging.')
 cli_parser.add_argument('-roi_off', action = 'store_false', default = cfg.REGION_OF_INTEREST,
                         help = 'Turns off region_of_interest. The whole frame will be analyzed.')
-cli_parser.add_argument('-ignore_registration_zones', action = 'store_false', default = cfg.IGNORE_REGISTRATION_ZONES,
+cli_parser.add_argument('-ignore_registration_zones', action = 'store_true', default = cfg.IGNORE_REGISTRATION_ZONES,
                         help = 'Stop checking whether the car is in a valid position to be (de-)registrated.')
 
 args = cli_parser.parse_args()
@@ -83,6 +83,9 @@ if not cfg.YOLO_INPUT.startswith("http"):
 
 if not cfg.REGION_OF_INTEREST:
     print('[INFO] REGION OF INTEREST is currently deactivated')
+
+if cfg.IGNORE_REGISTRATION_ZONES:
+    print('[INFO] Registration zones are currently deactivated')
 
 MIN_LOOP_DUR = (1/cfg.LIMIT_FPS)*1000 # In ms, to limit FPS
 
