@@ -68,6 +68,7 @@ else:
 
 if cfg.HEADLESS:
     print('[INFO] Headless Mode - Terminate with Ctrl+C')
+else: print('[INFO] Showing Live Output - Terminate with Q')
 
 if cfg.WRITE_VIDEO:
     print("[INFO] Will write images into output file")
