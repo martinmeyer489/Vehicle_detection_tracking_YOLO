@@ -72,8 +72,21 @@ VERTICAL_TOLERANCE_MOVEMENT = 15 # vertical tolerance for continuing movement of
 VERTICAL_TOLERANCE = 20 # vertical tolerance for assign IDs (Object centroid to Input centroid)
 
 MAX_DISAPPEARED = 20 # Number of consecutive frames without detection before deregistering an object
+
+# The next three configs are very specific to the cameras used for this project. They might need to be heavily
+# adjusted for different camera setups or the corresponding code in the centroidtracker.py might need to be 
+# changed completely for different camera setups etc.
+
 IGNORE_REGISTRATION_ZONES = False # Setting this to true will skip the check whether the vehicle is in a valid position for (de-)registration
                                   # This is useful when testing other camera inputs where registration zones are not applyable or not yet configured
+
+LANE_SEPARATOR = 300 # <300 are the upper lanes (eastbound), >300 the lower (westbound)
+
+DEREGISTRATION_ZONE = 50 # If the centroid of a car is within 50px of frame-edge, it will be deregistered
+
+FRAME_WIDTH = 1280 # Needed to calculate the deregistration zone for the lower lanes
+
+
 
 ############################################################################
 # Database Settings

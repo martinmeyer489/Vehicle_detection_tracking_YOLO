@@ -92,8 +92,9 @@ class centroidtracker():
                 # frames where a given object has been marked as
                 # missing, deregister it
                 # first two ifs check if vehicle is on edge of lane and use different maxdisappeared if so
-                if (self.objects[objectID][1] < 277 and self.objects[objectID][0] < 50) \
-                        or (self.objects[objectID][1] > 327 and self.objects[objectID][0] > 1230) \
+                if (self.objects[objectID][1] < cfg.LANE_SEPARATOR and self.objects[objectID][0] < cfg.DEREGISTRATION_ZONE) \
+                        or (self.objects[objectID][1] > cfg.LANE_SEPARATOR \
+                            and self.objects[objectID][0] > (cfg.FRAME_WIDTH-cfg.LANE_SEPARATOR)) \
                         or (self.disappeared[objectID] > self.MAX_DISAPPEARED):
                     self.deregister(objectID)
 
@@ -121,9 +122,10 @@ class centroidtracker():
         if len(self.objects) == 0:
             for i in range(0, len(inputCentroids)):
                 # check if vehicle is not on edge of lane
-                if (inputCentroids[i][1] < 277 and inputCentroids[i][0] >= 50) or \
-                        (inputCentroids[i][1] > 327 and inputCentroids[i][0] <= 1230) or \
-                            cfg.IGNORE_REGISTRATION_ZONES:
+                if (inputCentroids[i][1] < cfg.LANE_SEPARATOR and inputCentroids[i][0] >= cfg.DEREGISTRATION_ZONE) \ 
+                        or (inputCentroids[i][1] > cfg.LANE_SEPARATOR \
+                            and inputCentroids[i][0] <= (cfg.FRAME_WIDTH-cfg.DEREGISTRATION_ZONE)) \
+                        or cfg.IGNORE_REGISTRATION_ZONES:
                     self.register(inputCentroids[i], inputBBoxes[i], confidences[i], class_ids[i])
 
                 # otherwise, are are currently tracking objects so we need to
@@ -189,8 +191,9 @@ class centroidtracker():
                 # frames the object has been marked "disappeared"
                 # for warrants deregistering the object
                 # check if vehicle was on edges of the lanes or has exceeded max_disappeared
-                if (objectCentroids[row][1] < 280 and objectCentroids[row][0] < 50) \
-                        or (objectCentroids[row][1] > 324 and objectCentroids[row][0] > 1230) \
+                if (objectCentroids[row][1] < cfg.LANE_SEPARATOR and objectCentroids[row][0] < cfg.DEREGISTRATION_ZONE) \
+                        or (objectCentroids[row][1] > cfg.LANE_SEPARATOR \
+                            and objectCentroids[row][0] > (cfg.FRAME_WIDTH-cfg.DEREGISTRATION_ZONE)) \
                         or (self.disappeared[objectID] > self.MAX_DISAPPEARED):
                     self.deregister(objectID)
 
@@ -198,9 +201,10 @@ class centroidtracker():
 
             # register each unused inputCentroid as a new object:
             for col in unusedCols:
-                if (inputCentroids[col][1] < 277 and inputCentroids[col][0] >= 50) or \
-                        (inputCentroids[col][1] > 327 and inputCentroids[col][0] <= 1230) or \
-                            cfg.IGNORE_REGISTRATION_ZONES: 
+                if (inputCentroids[col][1] < cfg.LANE_SEPARATOR and inputCentroids[col][0] >= cfg.DEREGISTRATION_ZONE) \
+                        or (inputCentroids[col][1] > cfg.LANE_SEPARATOR \
+                            and inputCentroids[col][0] <= (cfg.FRAME_WIDTH-cfg.DEREGISTRATION_ZONE)) \
+                        or cfg.IGNORE_REGISTRATION_ZONES: 
                     self.register(inputCentroids[col], inputBBoxes[col], confidences[col], class_ids[col])
 
         # add each object to database
