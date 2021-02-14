@@ -87,7 +87,7 @@ class centroidtracker():
                 self.continued_movement[objectID] = False
                 self.disappeared[objectID] += 1
                 self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
-                self.previousPos[objectID] = self.objects[objectID]
+                self.previousPos[objectID] = None
                 # if we have reached a maximum of consecutive
                 # frames where a given object has been marked as
                 # missing, deregister it
@@ -160,13 +160,14 @@ class centroidtracker():
                         self.disappeared[objectID] = 0
                         self.continued_movement[objectID] = False
                         # save the movement between the last two frames (only, if it is "forward")
-                        if (self.objects[objectID][1] < 302 and (
-                                self.objects[objectID][0] - self.previousPos[objectID][0]) < 0) \
-                                or (self.objects[objectID][1] > 302 and (
-                                self.objects[objectID][0] - self.previousPos[objectID][0]) > 0):
-                            self.lastValidMovement[objectID] = (self.objects[objectID] - self.previousPos[
-                                objectID]) / self.time_between_frames
-                        self.previousPos[objectID] = self.objects[objectID]
+                        if self.previousPos[objectID] is not None:
+                            if (self.objects[objectID][1] < 302 and (
+                                    self.objects[objectID][0] - self.previousPos[objectID][0]) < 0) \
+                                    or (self.objects[objectID][1] > 302 and (
+                                    self.objects[objectID][0] - self.previousPos[objectID][0]) > 0):
+                                self.lastValidMovement[objectID] = (self.objects[objectID] - self.previousPos[
+                                    objectID]) / self.time_between_frames
+                            self.previousPos[objectID] = self.objects[objectID]
                         # indicate that we have examined each of the row and
                         # column indexes, respectively
                         usedRows.add(row)
@@ -183,7 +184,7 @@ class centroidtracker():
                 self.continued_movement[objectID] = False
                 self.disappeared[objectID] += 1
                 self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
-                self.previousPos[objectID] = self.objects[objectID]
+                self.previousPos[objectID] = None
                 # check to see if the number of consecutive
                 # frames the object has been marked "disappeared"
                 # for warrants deregistering the object
