@@ -122,7 +122,7 @@ class centroidtracker():
         if len(self.objects) == 0:
             for i in range(0, len(inputCentroids)):
                 # check if vehicle is not on edge of lane
-                if (inputCentroids[i][1] < cfg.LANE_SEPARATOR and inputCentroids[i][0] >= cfg.DEREGISTRATION_ZONE) \ 
+                if (inputCentroids[i][1] < cfg.LANE_SEPARATOR and inputCentroids[i][0] >= cfg.DEREGISTRATION_ZONE) \
                         or (inputCentroids[i][1] > cfg.LANE_SEPARATOR \
                             and inputCentroids[i][0] <= (cfg.FRAME_WIDTH-cfg.DEREGISTRATION_ZONE)) \
                         or cfg.IGNORE_REGISTRATION_ZONES:
@@ -163,10 +163,10 @@ class centroidtracker():
                         self.continued_movement[objectID] = False
                         # save the movement between the last two frames (only, if it is "forward")
                         if self.previousPos[objectID] is not None:
-                            if (self.objects[objectID][1] < 302 and (
-                                    self.objects[objectID][0] - self.previousPos[objectID][0]) < 0) \
-                                    or (self.objects[objectID][1] > 302 and (
-                                    self.objects[objectID][0] - self.previousPos[objectID][0]) > 0):
+                            if (self.objects[objectID][1] < 302 \
+                                    and (self.objects[objectID][0] - self.previousPos[objectID][0]) < 0) \
+                                or (self.objects[objectID][1] > 302 \
+                                    and (self.objects[objectID][0] - self.previousPos[objectID][0]) > 0):
                                 self.lastValidMovement[objectID] = (self.objects[objectID] - self.previousPos[
                                     objectID]) / self.time_between_frames
                             self.previousPos[objectID] = self.objects[objectID]
