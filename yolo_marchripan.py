@@ -119,6 +119,7 @@ ct = centroidtracker()
 
 
 def main():
+
     # initialize the video stream, pointer to output video file, and
     # frame dimensions
     # initialize our centroid tracker and frame dimensions
@@ -127,7 +128,7 @@ def main():
     fps = FPS().start()
 
     try:
-        while True:
+        while True:    
             loop_start = int(round(time.time()*1000))
             # read the next frame from stream
             (grabbed, frame) = vs.read()
@@ -144,6 +145,7 @@ def main():
             loop_duration = loop_start = int(round(time.time()*1000)) - loop_start
             if loop_duration < MIN_LOOP_DUR: 
                 time.sleep((MIN_LOOP_DUR-loop_duration)/1000)
+
 
     except KeyboardInterrupt:
         #this will not work correctly on windows but does on Ubuntu

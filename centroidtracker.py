@@ -74,7 +74,6 @@ class centroidtracker():
         if self.previous_timestamp is not None and not cfg.IS_VIDEO_INPUT:
             self.time_between_frames = frame_timestamp - self.previous_timestamp
 
-        print(self.time_between_frames)
         # create db connection
         conn = db.create_connection(cfg.DATABASE_PATH)
 
@@ -231,7 +230,6 @@ class centroidtracker():
     def addToDatabase(self, frame_timestamp, frame_date, frame_time, objectID):
         if cfg.SKIP_DB:
             return
-
         object_for_db = (frame_timestamp,
                          frame_date,
                          frame_time,
@@ -245,6 +243,7 @@ class centroidtracker():
                          self.continued_movement[objectID],
                          int(round(time.time() * 1000)))
         self.DBList.append(object_for_db)
+       
 
     def pushToDatabase(self, conn):
         if len(self.DBList) == 0 or cfg.SKIP_DB:
@@ -252,3 +251,4 @@ class centroidtracker():
 
         db.insert_detections(conn, self.DBList)
         self.DBList = []
+
