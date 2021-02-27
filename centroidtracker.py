@@ -90,7 +90,7 @@ class centroidtracker():
                 # if we have reached a maximum of consecutive
                 # frames where a given object has been marked as
                 # missing, deregister it
-                # first two ifs check if vehicle is on edge of lane and use different maxdisappeared if so
+                # first two ifs check if vehicle is on edge of lane and deregister object immediately if so
                 if (self.objects[objectID][1] < cfg.LANE_SEPARATOR and self.objects[objectID][0] < cfg.DEREGISTRATION_ZONE) \
                         or (self.objects[objectID][1] > cfg.LANE_SEPARATOR \
                             and self.objects[objectID][0] > (cfg.FRAME_WIDTH-cfg.LANE_SEPARATOR)) \
