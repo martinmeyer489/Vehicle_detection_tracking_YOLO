@@ -132,12 +132,13 @@ class centroidtracker():
             # grab the set of object IDs and corresponding centroids
             objectIDs = list(self.objects.keys())
             objectCentroids = list(self.objects.values())
-            # compute the distance between each pair of object centroids and input centroids, respectively
+            # compute the distance between each pair of object centroids and input centroids
             D = dist.cdist(np.array(objectCentroids), inputCentroids)
             # create sorted list of tuples of indexes and value in ascending order
             D_sorted = sorted(np.ndenumerate(D), key=itemgetter(1))
             usedRows = set()
             usedCols = set()
+            # loop through pairs of object, inputCentroid, and distance
             for x in D_sorted:
                 row = x[0][0]
                 col = x[0][1]
@@ -164,8 +165,7 @@ class centroidtracker():
                                 self.lastValidMovement[objectID] = (self.objects[objectID] - self.previousPos[
                                     objectID]) / self.time_between_frames
                             self.previousPos[objectID] = self.objects[objectID]
-                        # indicate that we have examined each of the row and
-                        # column indexes, respectively
+                        # indicate that we have examined each of the row and column indexes, respectively
                         usedRows.add(row)
                         usedCols.add(col)
             # compute both the row and column index we have NOT yet examined
