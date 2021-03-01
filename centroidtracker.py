@@ -214,17 +214,16 @@ class centroidtracker():
         return self.objects
 
     def continueMovement(self, objectID, verticalTolerance):
-        # check if values for the last valid movement is existing (i.e. the object has to be detected at least twice)
+        # check if values for the last valid movement is existing (i.e. the object must have been detected at least once in two consecutive frames)
         if self.lastValidMovement[objectID] is not None:
-            # check if vertical movement is plausible
-            if abs(self.lastValidMovement[objectID][1]) < verticalTolerance:
-                if (self.objects[objectID][1] < 302
-                    and (self.lastValidMovement[objectID][0]) < 0) \
-                        or (self.objects[objectID][1] > 302
-                            and (self.lastValidMovement[objectID][0]) > 0):
-                    self.objects[objectID][0] = self.objects[objectID][0] + \
-                                                (self.lastValidMovement[objectID][0] * self.time_between_frames)
-                    self.continued_movement[objectID] = True
+            # check if movement is in correct direction
+            if (self.objects[objectID][1] < 302
+                and (self.lastValidMovement[objectID][0]) < 0) \
+                    or (self.objects[objectID][1] > 302
+                        and (self.lastValidMovement[objectID][0]) > 0):
+                self.objects[objectID][0] = self.objects[objectID][0] + \
+                                            (self.lastValidMovement[objectID][0] * self.time_between_frames)
+                self.continued_movement[objectID] = True
 
     def addToDatabase(self, frame_timestamp, frame_date, frame_time, objectID):
         if cfg.SKIP_DB:
