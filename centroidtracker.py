@@ -132,12 +132,8 @@ class centroidtracker():
             # grab the set of object IDs and corresponding centroids
             objectIDs = list(self.objects.keys())
             objectCentroids = list(self.objects.values())
-            # compute the distance between each pair of object
-            # centroids and input centroids, respectively -- our
-            # goal will be to match an input centroid to an existing
-            # object centroid
+            # compute the distance between each pair of object centroids and input centroids, respectively
             D = dist.cdist(np.array(objectCentroids), inputCentroids)
-
             # create sorted list of tuples of indexes and value in ascending order
             D_sorted = sorted(np.ndenumerate(D), key=itemgetter(1))
             usedRows = set()
