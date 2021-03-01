@@ -7,7 +7,6 @@ import numpy as np
 from scipy.spatial import distance as dist
 from operator import itemgetter
 
-VERTICAL_TOLERANCE_MOVEMENT = cfg.VERTICAL_TOLERANCE_MOVEMENT
 VERTICAL_TOLERANCE = cfg.VERTICAL_TOLERANCE
 DISTANCE_TOLERANCE = cfg.DISTANCE_TOLERANCE
 MAX_DISAPPEARED = cfg.MAX_DISAPPEARED
@@ -85,7 +84,7 @@ class centroidtracker():
             for objectID in list(self.disappeared.keys()):
                 self.continued_movement[objectID] = False
                 self.disappeared[objectID] += 1
-                self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
+                self.continueMovement(objectID, VERTICAL_TOLERANCE)
                 self.previousPos[objectID] = None
                 # if we have reached a maximum of consecutive
                 # frames where a given object has been marked as
@@ -184,7 +183,7 @@ class centroidtracker():
                 objectID = objectIDs[row]
                 self.continued_movement[objectID] = False
                 self.disappeared[objectID] += 1
-                self.continueMovement(objectID, VERTICAL_TOLERANCE_MOVEMENT)
+                self.continueMovement(objectID, VERTICAL_TOLERANCE)
                 self.previousPos[objectID] = None
                 # check to see if the number of consecutive
                 # frames the object has been marked "disappeared"
@@ -214,11 +213,11 @@ class centroidtracker():
         self.previous_timestamp = frame_timestamp
         return self.objects
 
-    def continueMovement(self, objectID, verticalToleranceMovement):
+    def continueMovement(self, objectID, verticalTolerance):
         # check if values for the last valid movement is existing (i.e. the object has to be detected at least twice)
         if self.lastValidMovement[objectID] is not None:
             # check if vertical movement is plausible
-            if abs(self.lastValidMovement[objectID][1]) < verticalToleranceMovement:
+            if abs(self.lastValidMovement[objectID][1]) < verticalTolerance:
                 if (self.objects[objectID][1] < 302
                     and (self.lastValidMovement[objectID][0]) < 0) \
                         or (self.objects[objectID][1] > 302
