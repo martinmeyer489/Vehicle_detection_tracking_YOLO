@@ -15,9 +15,6 @@ from centroidtracker import centroidtracker
 # Settings
 # Read settings from config.py or command line flags
 
-#TODO Continue Movement bei ObjectID 29 genauer anschauen vom Video
-#TODO Parameter abchecken
-
 cli_parser = argparse.ArgumentParser(description='''Marchripan Vehicle Tracker - 
                                                 All arguments can be set permanently in config.py and need only to  
                                                 be used for quick changes or debugging purposes.

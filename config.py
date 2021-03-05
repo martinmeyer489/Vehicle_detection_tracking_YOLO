@@ -13,7 +13,7 @@ import numpy as np
 # General Settings
 DEBUG_MODE = False # prints additional messages for debugging
 HEADLESS = False # run without GUI on server
-WRITE_VIDEO = False # write a video-file
+WRITE_VIDEO = True # write a video-file
 OUTPUT_PATH = "output.avi"
 VIDEO_FPS = 20  # FPS Rate of output video
 LIMIT_FPS = 30  # FPS Limit for tracking-algorithm
