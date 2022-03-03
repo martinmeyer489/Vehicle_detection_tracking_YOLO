@@ -12,8 +12,6 @@ from imutils.video import FPS, VideoStream
 
 import database as db
 
-URL4K = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi"
-URLHD = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=0"
 
 RTSP_URL = URLHD
 
