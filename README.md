@@ -4,30 +4,17 @@ Project by Wepan Chada, Christian Bilgic and Martin Meyer.
 The project goal was to detect vehicles 
 
 ## Detector
-* several detectors were tested like 
+* several detectors were tested like Frame Differencing and YOLO 
 * training of own detection model  based on YOLO v3
 * CUDA ....
 
 ## Tracking
 * Implementation & Benchmarking of Mean shift, Deep Sort and Centroid Tracking Methods
-* DEcision on Centroid tracking Methods because of highest
-* Modification of Tracking algorithm to specific use case..
+* Decision on Centroid tracking Methods because of highest
+* Modification of Tracking algorithm to specific use case by implementing Deregisterzones
 
 ## Database
 +
-
-
-[![]({dcaitti.jpg})]({https://www.youtube.com/watch?v=HXrzMZpBrbA} "Link Title")
-<a href="{https://www.youtube.com/watch?v=HXrzMZpBrbA}" title="Video"><img src="{dcaitti.jpg}"  /></a>
-
-[<img src="dcaitti.jpg">](https://www.youtube.com/watch?v=HXrzMZpBrbA)
-
-
-
-
-<img src="dcaitti.jpg"
-     alt="Markdown Monster icon"
-     style="float: left; margin-right: 10px;" />
 
 
 geplante features:
@@ -37,4 +24,16 @@ geplante features:
 
 datenbank: muss noch bb_y und bb_x irgendwie einbauen
 muss noch confidence einbauen
+
+# Demo
+
+[<img src="dcaitti.jpg">](https://www.youtube.com/watch?v=HXrzMZpBrbA)
+
+
+
+
+
+
+
+
 
