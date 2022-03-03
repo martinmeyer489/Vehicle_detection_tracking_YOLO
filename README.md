@@ -17,7 +17,9 @@ The project goal was to detect vehicles
 +
 
 
-
+<img src="dcaitti.jpg"
+     alt="Markdown Monster icon"
+     style="float: left; margin-right: 10px;" />
 
 
 geplante features:
