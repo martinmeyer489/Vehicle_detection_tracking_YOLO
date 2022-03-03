@@ -17,6 +17,8 @@ The project goal was to detect vehicles
 +
 
 
+<a href="{https://www.youtube.com/watch?v=HXrzMZpBrbA}" title="Video"><img src="{dcaitti.jpg}" alt="Alternate Text" /></a>
+
 <img src="dcaitti.jpg"
      alt="Markdown Monster icon"
      style="float: left; margin-right: 10px;" />
