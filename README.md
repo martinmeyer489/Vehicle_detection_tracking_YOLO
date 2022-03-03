@@ -20,6 +20,11 @@ The project goal was to detect vehicles
 [![]({dcaitti.jpg})]({https://www.youtube.com/watch?v=HXrzMZpBrbA} "Link Title")
 <a href="{https://www.youtube.com/watch?v=HXrzMZpBrbA}" title="Video"><img src="{dcaitti.jpg}"  /></a>
 
+[<img src="dcaitti.jpg">](https://www.youtube.com/watch?v=HXrzMZpBrbA)
+
+
+
+
 <img src="dcaitti.jpg"
      alt="Markdown Monster icon"
      style="float: left; margin-right: 10px;" />
