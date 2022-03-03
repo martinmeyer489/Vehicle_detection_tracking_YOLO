@@ -17,6 +17,7 @@ The project goal was to detect vehicles
 +
 
 
+[![Alternate Text]({dcaitti.jpg})]({https://www.youtube.com/watch?v=HXrzMZpBrbA} "Link Title")
 <a href="{https://www.youtube.com/watch?v=HXrzMZpBrbA}" title="Video"><img src="{dcaitti.jpg}" alt="Alternate Text" /></a>
 
 <img src="dcaitti.jpg"
