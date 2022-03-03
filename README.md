@@ -1,8 +1,6 @@
 # Detection and Tracking of Vehicles with OpenCV
 
-Project by Wepan Chada, Christian Bilgic and Martin Meyer 
-[//]: # (with supervision by the Daimler Center for Automotive Information Technology Innovations DCAITI and Fraunhofer FOKUS)
-
+Project by Wepan Chada, Christian Bilgic and Martin Meyer.
 The project goal was to detect vehicles 
 
 ## Detector
@@ -17,6 +15,8 @@ The project goal was to detect vehicles
 
 ## Database
 +
+
+
 
 
 
