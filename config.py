@@ -22,7 +22,6 @@ HIDE_FRAME_COUNT = False # Dont show "Analysing Frame XYZ in console output"
 
 ############################################################################
 # Input Settings
-YOLO_INPUT = "https://media.dcaiti.tu-berlin.de/tccams/1c/axis-cgi/mjpg/video.cgi?camera=1&resolution=1280x720&rotation=0&audio=0&mirror=0&fps=0&compression=00"
 IS_VIDEO_INPUT = False
 
 
@@ -39,12 +38,12 @@ REGION_OF_INTEREST = True # Skip parts of the image from being analyzed
 #              One can save multiple arrays here, just make sure to edit ROI_VERTICE to load the correct 
 
 #########
-# TUB Centercam 1
+#  Centercam 1
 TUB_C1 = np.array([[0, 195], [1280, 195], [1280, 280], [0, 280],
                 [0, 324], [1280, 324], [1280, 430], [0, 430]], 
                 np.int32)
 ##########
-# TUB Centercam 2
+#  Centercam 2
 TUB_C2 = np.array([0, 0], 
                 np.int32)
 ##########
