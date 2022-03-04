@@ -1,10 +1,10 @@
 # Detection and Tracking of Vehicles with OpenCV
 
 Project by Wepan Chada, Christian Bilgic and Martin Meyer.
-The project goal was to detect and track vehicles in real time and storing obtained information in a relational database
+The project goal was to detect and track vehicles in real time and store obtained information in a relational database
 
 ## Detector
-* several detectors were tested like Frame Differencing and YOLO 
+* Several detectors were tested like Frame Differencing and YOLO 
 * Training of own detection model based on YOLO v4 tiny, because trained models on common dataset like COCO did not perform satisfactory on used camera perspective
 * Labelling of own data to better account for vehicle occlusions
 * Final model is able to reliably detect vehicles with an AP and a F1 Score of 98 % and average IoU of 88 %
